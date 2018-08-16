@@ -1,4 +1,7 @@
+import numpy
 import semantic_version
+from .feature_types import FeatureType
+from .feature_types import FeatureSet
 from . import export
 
 @export
@@ -48,3 +51,32 @@ class GeneticEncoding(object):
 
     def _get_dimensions(self, feature):
         required_feature_size = len(feature)  # applies for list or FeatureType
+
+    def sample_random(self):
+        code = []
+        for feature in self._features:
+            feature_name = feature['name']
+            feature_type = feature['type']
+            offset = feature['offset']
+
+            if issubclass(feature_type, FeatureType):
+                code.append(feature_type.default_sample_random())
+            elif isinstance(feature_type, FeatureSet):
+                subfeatures = feature_type.get_features()
+                pass
+            elif isinstance(feature_type, FeatureType):
+                code.append(feature_type.sample_random())
+            elif isinstance(feature_type, list):
+                pass
+            else:
+                raise NotImplementedError('Unknown feature type for sampling.')
+
+        return GeneCode(code, self)
+
+class GeneCode(object):
+    def __init__(self, code, space):
+        self._code = code
+        self._space = space
+
+    def as_numpy(self):
+        return numpy.array(self._code)
