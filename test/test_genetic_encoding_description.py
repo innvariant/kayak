@@ -31,3 +31,13 @@ class GeneticEncodingDescriptionTest(unittest.TestCase):
         self.assertIsInstance(code, kayak.GeneCode)
         print(code.as_numpy())
 
+    def test_mutation_changes(self):
+        space = kayak.GeneticEncoding('foo', '0.1.1')
+        space.add_feature('a', ft.NaturalFloat)
+        code = space.sample_random()
+
+        self.assertIsInstance(code, kayak.GeneCode)
+        self.assertEqual(code.as_numpy().shape, (1,))
+
+
+

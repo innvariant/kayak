@@ -3,7 +3,7 @@ from . import export
 
 @export
 class FeatureType(object):
-    def cross_over(other_gene):
+    def cross_over(self, other_gene):
         raise NotImplementedError()
 
     def mutate_random(self):
@@ -30,8 +30,12 @@ class FeatureSet(FeatureType):
 
 @export
 class NaturalFloat(FeatureType):
+    def __init__(self, lower_border, upper_border):
+        self._lower_border = lower_border
+        self._upper_border = upper_border
+
     def sample_random(self):
-        return random.uniform(-100, 100)
+        return random.uniform(self._lower_border, self._upper_border)
 
     @staticmethod
     def default_sample_random():
@@ -39,8 +43,12 @@ class NaturalFloat(FeatureType):
 
 @export
 class NaturalNumber(FeatureType):
+    def __init__(self, lower_border, upper_border):
+        self._lower_border = lower_border
+        self._upper_border = upper_border
+
     def sample_random(self):
-        return random.randint(1, 5000)
+        return random.randint(self._lower_border, self._upper_border)
 
     @staticmethod
     def default_sample_random():
