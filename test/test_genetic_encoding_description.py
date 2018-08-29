@@ -17,3 +17,17 @@ class GeneticEncodingDescriptionTest(unittest.TestCase):
 
         self.assertIsInstance(code, kayak.GeneCode)
         self.assertEqual(code.as_numpy().shape, (1,))
+
+    def test_sample_feature(self):
+        gene_space3 = kayak.GeneticEncoding('test', '0.1.1')
+        gene_space3.add_feature('a', [1, 2, 3])
+        gene_space3.add_feature('b', ft.NaturalNumber)
+        gene_space3.add_feature('xyz', [
+            ft.FeatureSet({'c': [1, 2, 3], 'd': ft.NaturalNumber}),
+            ft.FeatureSet({'c': ft.NaturalFloat, 'd': ft.NaturalNumber, 'e': [-1, -2, -3]})
+        ])
+
+        code = gene_space3.sample_random()
+        self.assertIsInstance(code, kayak.GeneCode)
+        print(code.as_numpy())
+

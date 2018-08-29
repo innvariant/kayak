@@ -1,3 +1,4 @@
+import random
 import numpy
 import semantic_version
 from .feature_types import FeatureType
@@ -59,19 +60,30 @@ class GeneticEncoding(object):
             feature_type = feature['type']
             offset = feature['offset']
 
-            if issubclass(feature_type, FeatureType):
-                code.append(feature_type.default_sample_random())
-            elif isinstance(feature_type, FeatureSet):
-                subfeatures = feature_type.get_features()
-                pass
-            elif isinstance(feature_type, FeatureType):
-                code.append(feature_type.sample_random())
-            elif isinstance(feature_type, list):
-                pass
-            else:
-                raise NotImplementedError('Unknown feature type for sampling.')
+            code.extend(_sample_random_from_feature(feature_type))
 
         return GeneCode(code, self)
+
+    def map(self, code):
+        pass
+
+def _sample_random_from_feature(feature_type):
+    if type(feature_type) is type and issubclass(feature_type, FeatureType):
+        return [feature_type.default_sample_random()]
+    elif isinstance(feature_type, FeatureSet):
+        code = []
+        for subfeature_name in feature_type.get_features():
+            subfeature_type = feature_type.get_features()[subfeature_name]
+            code.extend(_sample_random_from_feature(subfeature_type))
+        return code
+    elif isinstance(feature_type, FeatureType):
+        return [feature_type.sample_random()]
+    elif isinstance(feature_type, list):
+        return _sample_random_from_feature(random.choice(feature_type))
+    else:
+        # Unknwon type, so it might be a fixed value we return as sample
+        return [feature_type]
+        # raise NotImplementedError('Unknown feature type for sampling.')
 
 class GeneCode(object):
     def __init__(self, code, space):
