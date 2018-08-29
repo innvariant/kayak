@@ -12,9 +12,9 @@ class FeatureType(object):
     def sample_random(self):
         raise NotImplementedError()
 
-    @staticmethod
-    def default_sample_random():
+    def __len__(self):
         raise NotImplementedError()
+
 
 @export
 class FeatureSet(FeatureType):
@@ -28,8 +28,15 @@ class FeatureSet(FeatureType):
     def get_features(self):
         return self._features
 
+    def __str__(self):
+        return 'set(' + ''.join(self._features) + ')'
+
+    def __len__(self):
+        return sum(len(f) for f in self._features)
+
+
 @export
-class NaturalFloat(FeatureType):
+class FloatType(FeatureType):
     def __init__(self, lower_border, upper_border):
         self._lower_border = lower_border
         self._upper_border = upper_border
@@ -37,12 +44,15 @@ class NaturalFloat(FeatureType):
     def sample_random(self):
         return random.uniform(self._lower_border, self._upper_border)
 
-    @staticmethod
-    def default_sample_random():
-        return random.uniform(-100, 100)
+    def __str__(self):
+        return 'float(%.2f, %.2f)' % (self._lower_border, self._upper_border)
+
+    def __len__(self):
+        return 1
+
 
 @export
-class NaturalNumber(FeatureType):
+class IntegerType(FeatureType):
     def __init__(self, lower_border, upper_border):
         self._lower_border = lower_border
         self._upper_border = upper_border
@@ -50,7 +60,13 @@ class NaturalNumber(FeatureType):
     def sample_random(self):
         return random.randint(self._lower_border, self._upper_border)
 
-    @staticmethod
-    def default_sample_random():
-        return random.randint(1, 5000)
+    def __str__(self):
+        return 'int(%.2f, %.2f)' % (self._lower_border, self._upper_border)
 
+    def __len__(self):
+        return 1
+
+
+NaturalInteger = IntegerType(1, 5000)
+NaturalFloat = FloatType(1, 100)
+UnitFloat = FloatType(0, 1)
