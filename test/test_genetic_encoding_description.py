@@ -40,8 +40,10 @@ class GeneticEncodingDescriptionTest(unittest.TestCase):
         ])
         code = space.sample_random()
 
+        code.mutate_random(space)
+
         self.assertIsInstance(code, kayak.GeneCode)
-        self.assertEqual(code.as_numpy().shape, (3,))
+        self.assertEqual(code.as_numpy().shape, (4,))
 
         print(space.map(code))
 

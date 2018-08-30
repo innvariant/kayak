@@ -13,10 +13,12 @@ space.add_feature('graph_generator', [
     ft.FeatureSet({'name': 'ErdosRenyi', 'rewiring_probability': ft.UnitFloat}),
     ft.FeatureSet({'name': 'WattsStrogatz', 'm': ft.IntegerType(1, 10), 'k': ft.IntegerType(1, 20)})
 ])
+space.add_feature('layers', ft.NaturalInteger)
 
-code = space.sample_random()  # e.g. [500, 10000, 'ErdosRenyi', 0.7, None, None, None]
-code_map = space.map(code)  # e.g. {'number_neurons': 500, 'number_edges': 10000, 'graph_generator': 0, 'name': 'ErdosRenyi', 'rewiring_probability': 0.7' } 
-
+code = space.sample_random()
+  # e.g. [500, 10000, 'ErdosRenyi', 0.7, None, None, None, 5] or [500, 10000, 0, 'ErdosRenyi', 0.7, 5]
+  # e.g. [250, 8000, None, None, 'WattsStrogatz', 4, 7, 5] or [250, 8000, 1, 'WattsStrogatz', 4, 7, 5] 
+code_map = space.map(code)  # e.g. {'number_neurons': 500, 'number_edges': 10000, 'graph_generator': 0, 'name': 'ErdosRenyi', 'rewiring_probability': 0.7', 'number_layers': 5 }
 ```
 
 
