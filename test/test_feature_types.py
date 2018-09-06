@@ -7,15 +7,19 @@ import kayak.feature_types as ft
 
 class FeatureTypeTest(unittest.TestCase):
     def test_sample_size_equals_type_size(self):
+        # Arrange
         types = [
             ft.FloatType(-1, 1),
             ft.NaturalFloat,
             ft.NaturalInteger
         ]
 
+        # Act
         for current_type in types:
             code =  current_type.sample_random()
             feature_size = len(current_type)
+
+            # Assert
             self.assertEqual(feature_size, len(code))
 
     def test_lengths(self):
