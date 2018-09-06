@@ -1,18 +1,71 @@
 import random
+import numpy as np
 from . import export
 
 @export
 class FeatureType(object):
+    """
+    Interface for generic feature types (instances are no features but type representations).
+    The feature type instance decides how to mutate given features (code vectors), sample them randomly or cross them over.
+    """
+
     def cross_over(self, code1, code2):
+        """
+
+        :param code1:
+        :type code1 list|numpy.array
+        :param code2:
+        :type code2 list|numpy.array
+        :return:
+        :rtype: numpy.array
+        """
         raise NotImplementedError()
 
     def mutate_random(self, code):
-        raise NotImplementedError()
+        """
+
+        :param code:
+        :type code list|numpy.array
+        :return:
+        :rtype: numpy.array
+        """
+        '''
+        Either this interface method can be directly overwritten to implement the random mutation on a given code or the _mutate_random(code) can be
+        used for similar behavious between several classes of feature types.
+        '''
+        return self._wrap_mutate_random(code)
+
+    def _wrap_mutate_random(self, code):
+        """
+        Common pre-checking code for a random mutation function of feature type classes. Either implement mutate_random(code) or _mutate_random(code),
+        based on your required behaviour.
+        """
+        if not isinstance(code, np.ndarray):
+            code = np.array(code)  # numpy array accepts almost all objects
+
+        if len(self) is not len(code):
+            raise ValueError('Can not mutate code which does not fit this set type!')
+
+        return self._mutate_random(code)
+
+    def _mutate_random(self, code):
+        raise NotImplementedError('You have to implement this method for the concrete feature type.')
 
     def sample_random(self):
+        """
+
+        :param code:
+        :type code list|numpy.array
+        :return:
+        :rtype: numpy.array
+        """
         raise NotImplementedError()
 
     def __len__(self):
+        """
+        :return: Number of dimensions for feature codes sampled from this feature type.
+        :rtype: int
+        """
         raise NotImplementedError()
 
 
@@ -41,12 +94,7 @@ class FeatureSet(FeatureType):
     def get_features(self):
         return self._features
 
-    def cross_over(self, code1, code2):
-        raise NotImplementedError()
-
-    def mutate_random(self, code):
-        if len(self) is not len(code):
-            raise ValueError('Can not mutate code which does not fit this set type!')
+    def _mutate_random(self, code):
         offset = 0
         for name in self._features:
             ftype = self._features[name]
@@ -84,13 +132,13 @@ class FloatType(FeatureType):
         self._upper_border = upper_border
 
     def sample_random(self):
-        return [random.uniform(self._lower_border, self._upper_border)]
+        return np.array([random.uniform(self._lower_border, self._upper_border)])
 
     def mutation_difference(self):
         sigma = (self._upper_border - self._lower_border) * 0.1
         return random.normalvariate(0, sigma)
 
-    def mutate_random(self, code):
+    def _mutate_random(self, code):
         mutation = code + self.mutation_difference()
         if mutation > self._upper_border:
             mutation = self._upper_border
@@ -112,13 +160,13 @@ class IntegerType(FeatureType):
         self._upper_border = upper_border
 
     def sample_random(self):
-        return [random.randint(self._lower_border, self._upper_border)]
+        return np.array([random.randint(self._lower_border, self._upper_border)])
 
     def mutation_difference(self):
         range = round((self._upper_border - self._lower_border) * 0.1)
         return random.randint(-range, range)
 
-    def mutate_random(self, code):
+    def _mutate_random(self, code):
         mutation = code + self.mutation_difference()
         if mutation > self._upper_border:
             mutation = self._upper_border
