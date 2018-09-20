@@ -2,6 +2,7 @@ import random
 import numpy as np
 from . import export
 
+
 @export
 class FeatureType(object):
     """

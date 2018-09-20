@@ -36,6 +36,21 @@ class GeneticEncoding(object):
         self._features = []  # provides O(1) access for positions and provides order of features
         self._features_by_pos = {}  # provides O(1) access by name for position
 
+    def contains(self, code):
+        """
+        Checks if the given code fits into this genetic encoding space.
+
+        :param code: Might be a GeneCode, numpy array or a list.
+        :return: Flag, indicating if it fits or not.
+        :rtype: bool
+        """
+        if isinstance(code, GeneCode):
+            # Unwrap the code if it is contained within a GeneCode object.
+            return self.contains(code.as_numpy())
+
+        # TODO implement
+        pass
+
     def add_feature(self, name: str, feature):
         if self.has_feature(name):
             raise ValueError('Feature with that name was already added.')
@@ -143,17 +158,34 @@ def _sample_random_from_feature(feature_type, one_hot=False):
 
 
 class GeneCode(object):
-    def __init__(self, code, space):
+    """
+    A gene is a vector (code) fitting into a certain vector space - its genetic encoding space.
+    In addition to a simple numpy array it also provides optimized functionality to access single features of the gene code with respect
+    to its genetic encoding space.
+    """
+    def __init__(self, code, space: GeneticEncoding):
+        if not space.contains(code):
+            raise ValueError('Code does not fit into genetic encoding space.')
         self._code = code
         self._space = space
 
     def as_numpy(self):
         return numpy.array(self._code)
 
-    def mutate_random(self, space : GeneticEncoding):
+    def assign(self, space: GeneticEncoding):
+        """
+        Setter method for injecting a genetic encoding space.
+
+        :param space: A fitting genetic encoding space in which space.contains(code) is True.
+        :return:
+        """
+        self._space = space
+        return self
+
+    def mutate_random(self):
         print('mutate_random()')
         offset = 0
-        for feature in space.get_ordered_feature_types():
+        for feature in self._space.get_ordered_feature_types():
             feature_size = len(feature)
             if isinstance(feature, FeatureType):
                 self._code[offset] = feature.mutate_random(self._code[offset])
