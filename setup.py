@@ -9,5 +9,8 @@ setup(
     packages=['kayak'],
     py_modules=['kayak'],
     install_requires=[],
-    dependency_links=[]
+    dependency_links=[],
+    extras_require={
+        'NetworkX': ['networkx']
+    }
 )
