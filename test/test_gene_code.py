@@ -3,7 +3,7 @@ import kayak
 import kayak.feature_types as ft
 import numpy
 
-class GeneticEncodingDescriptionTest(unittest.TestCase):
+class GeneCodeTest(unittest.TestCase):
     def test_init_fail(self):
         """
         Constructing a gene code with a space it does not fit in has to raise an exception.
