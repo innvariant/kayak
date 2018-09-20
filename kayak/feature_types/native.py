@@ -1,24 +1,24 @@
 import random
 import numpy as np
-from . import export
+from .. import export
 
 
 @export
 class FeatureType(object):
     """
-    Interface for generic feature types (instances are no features but type representations).
-    The feature type instance decides how to mutate given features (code vectors), sample them randomly or cross them over.
+    Interface for generic feature types (instances are no feature_types but type representations).
+    The feature type instance decides how to mutate given feature_types (code vectors), sample them randomly or cross them over.
     """
 
     def cross_over(self, code1, code2):
         """
 
         :param code1:
-        :type code1 list|numpy.array
+        :type code1 kayak.GeneCode|list|numpy.array
         :param code2:
-        :type code2 list|numpy.array
+        :type code2 kayak.GeneCode|list|numpy.array
         :return:
-        :rtype: numpy.array
+        :rtype: kayak.GeneCode
         """
         raise NotImplementedError()
 
@@ -28,7 +28,7 @@ class FeatureType(object):
         :param code:
         :type code list|numpy.array
         :return:
-        :rtype: numpy.array
+        :rtype: kayak.GeneCode
         """
         '''
         Either this interface method can be directly overwritten to implement the random mutation on a given code or the _mutate_random(code) can be
@@ -56,9 +56,9 @@ class FeatureType(object):
         """
 
         :param code:
-        :type code list|numpy.array
+        :type code kayak.GeneCode|list|numpy.array
         :return:
-        :rtype: numpy.array
+        :rtype: kayak.GeneCode
         """
         raise NotImplementedError()
 
@@ -73,7 +73,7 @@ class FeatureType(object):
 @export
 class FeatureSet(FeatureType):
     """
-     A feature containing multiple sub-features within a genetic encoding space.
+     A feature containing multiple sub-feature_types within a genetic encoding space.
      Single values of this set can only be mutated together.
     """
     def __init__(self, features):
@@ -127,34 +127,6 @@ class FeatureSet(FeatureType):
 
 
 @export
-class FloatType(FeatureType):
-    def __init__(self, lower_border, upper_border):
-        self._lower_border = lower_border
-        self._upper_border = upper_border
-
-    def sample_random(self):
-        return np.array([random.uniform(self._lower_border, self._upper_border)])
-
-    def mutation_difference(self):
-        sigma = (self._upper_border - self._lower_border) * 0.1
-        return random.normalvariate(0, sigma)
-
-    def _mutate_random(self, code):
-        mutation = code + self.mutation_difference()
-        if mutation > self._upper_border:
-            mutation = self._upper_border
-        if mutation < self._lower_border:
-            mutation = self._lower_border
-        return mutation
-
-    def __str__(self):
-        return 'float(%.2f, %.2f)' % (self._lower_border, self._upper_border)
-
-    def __len__(self):
-        return 1
-
-
-@export
 class IntegerType(FeatureType):
     def __init__(self, lower_border, upper_border):
         self._lower_border = lower_border
@@ -177,6 +149,34 @@ class IntegerType(FeatureType):
 
     def __str__(self):
         return 'int(%.2f, %.2f)' % (self._lower_border, self._upper_border)
+
+    def __len__(self):
+        return 1
+
+
+@export
+class FloatType(FeatureType):
+    def __init__(self, lower_border, upper_border):
+        self._lower_border = lower_border
+        self._upper_border = upper_border
+
+    def sample_random(self):
+        return np.array([random.uniform(self._lower_border, self._upper_border)])
+
+    def mutation_difference(self):
+        sigma = (self._upper_border - self._lower_border) * 0.1
+        return random.normalvariate(0, sigma)
+
+    def _mutate_random(self, code):
+        mutation = code + self.mutation_difference()
+        if mutation > self._upper_border:
+            mutation = self._upper_border
+        if mutation < self._lower_border:
+            mutation = self._lower_border
+        return mutation
+
+    def __str__(self):
+        return 'float(%.2f, %.2f)' % (self._lower_border, self._upper_border)
 
     def __len__(self):
         return 1

@@ -25,7 +25,7 @@ class GeneticEncoding(object):
             raise ValueError('Invalid semantic version for genetic encoding given', e)
 
         """
-        An ordered list of features (ordered as it maps the dimensions of the genetic encoding space).
+        An ordered list of feature_types (ordered as it maps the dimensions of the genetic encoding space).
          [
          {'name': 'abc', 'type': ['possible_value_1', 'possible_value_2'], offset: 0},
          {'name': 'def', 'type': ft.UnitFloat, offset: 1},
@@ -33,7 +33,7 @@ class GeneticEncoding(object):
          {'name': 'tur', 'type': FeatureSet(), offset: 5}
          ]
         """
-        self._features = []  # provides O(1) access for positions and provides order of features
+        self._features = []  # provides O(1) access for positions and provides order of feature_types
         self._features_by_pos = {}  # provides O(1) access by name for position
 
     def contains(self, code):
@@ -160,7 +160,7 @@ def _sample_random_from_feature(feature_type, one_hot=False):
 class GeneCode(object):
     """
     A gene is a vector (code) fitting into a certain vector space - its genetic encoding space.
-    In addition to a simple numpy array it also provides optimized functionality to access single features of the gene code with respect
+    In addition to a simple numpy array it also provides optimized functionality to access single feature_types of the gene code with respect
     to its genetic encoding space.
     """
     def __init__(self, code, space: GeneticEncoding):
