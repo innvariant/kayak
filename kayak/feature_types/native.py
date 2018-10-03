@@ -62,6 +62,15 @@ class FeatureType(object):
         """
         raise NotImplementedError()
 
+    def fits(self, code):
+        """
+
+        :param code: numpy array
+        :return: whether a code fits into FeatureType
+        :rtype: boolean
+        """
+        raise NotImplementedError()
+
     def __len__(self):
         """
         :return: Number of dimensions for feature codes sampled from this feature type.
@@ -147,6 +156,9 @@ class IntegerType(FeatureType):
             mutation = self._lower_border
         return mutation
 
+    def fits(self, code):
+        return self._lower_border <= code <= self._upper_border and type(code) == int
+
     def __str__(self):
         return 'int(%.2f, %.2f)' % (self._lower_border, self._upper_border)
 
@@ -174,6 +186,10 @@ class FloatType(FeatureType):
         if mutation < self._lower_border:
             mutation = self._lower_border
         return mutation
+
+    def fits(self, code):
+        code = float(code)
+        return self._lower_border <= code <= self._upper_border
 
     def __str__(self):
         return 'float(%.2f, %.2f)' % (self._lower_border, self._upper_border)
