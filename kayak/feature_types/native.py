@@ -62,7 +62,7 @@ class FeatureType(object):
         """
         raise NotImplementedError()
 
-    def fits(self, code):
+    def fits(self, code, start):
         """
 
         :param code: numpy array
@@ -171,8 +171,8 @@ class IntegerType(FeatureType):
             mutation = self._lower_border
         return mutation
 
-    def fits(self, code):
-        return self._lower_border <= code <= self._upper_border and type(code) == int
+    def fits(self, code, start):
+        return self._lower_border <= code[start] <= self._upper_border and type(code[start]) == int
 
     def __str__(self):
         return 'int(%.2f, %.2f)' % (self._lower_border, self._upper_border)
@@ -202,9 +202,9 @@ class FloatType(FeatureType):
             mutation = self._lower_border
         return mutation
 
-    def fits(self, code):
-        code = float(code)
-        return self._lower_border <= code <= self._upper_border
+    def fits(self, code, start):
+        code_1 = float(code[start])
+        return self._lower_border <= code_1  <= self._upper_border
 
     def __str__(self):
         return 'float(%.2f, %.2f)' % (self._lower_border, self._upper_border)
