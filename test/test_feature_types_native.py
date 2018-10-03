@@ -5,6 +5,7 @@ import itertools
 import unittest
 import kayak.feature_types as ft
 
+
 class FeatureTypeTest(unittest.TestCase):
     def test_sample_size_equals_type_size(self):
         # Arrange
@@ -16,7 +17,7 @@ class FeatureTypeTest(unittest.TestCase):
 
         # Act
         for current_type in types:
-            code =  current_type.sample_random()
+            code = current_type.sample_random()
             feature_size = len(current_type)
 
             # Assert
@@ -34,8 +35,12 @@ class FeatureTypeTest(unittest.TestCase):
         for length in test_lengths:
             base_feature_set = {}
             remaining_length = length
-            #base_feature_keys = random.sample(string.ascii_lowercase, length)
-            base_feature_keys = random.sample([''.join(cs) for cs in itertools.product(string.ascii_lowercase, repeat=math.ceil(math.log(length, len(string.ascii_lowercase))))], length)
+            # base_feature_keys = random.sample(string.ascii_lowercase, length)
+            base_feature_keys = random.sample([''.join(cs) for cs in itertools.product(string.ascii_lowercase,
+                                                                                       repeat=math.ceil(math.log(length,
+                                                                                                                 len(
+                                                                                                                     string.ascii_lowercase))))],
+                                              length)
             while remaining_length > 0:
                 use_list_or_base_or_set = random.randint(0, 2)
                 feature_name = base_feature_keys.pop()
@@ -108,7 +113,8 @@ class FeatureTypeTest(unittest.TestCase):
                 self.assertNotEqual(code, mutation, 'Code and its mutation may not be equal.')
                 self.assertLessEqual(mutation, ul)
                 self.assertGreaterEqual(mutation, ll)
-                self.assertLess(code - mutation, 0.35 * range_diff, 'Code and mutation should not differ more than 35% of its possible range space')
+                self.assertLess(code - mutation, 0.35 * range_diff,
+                                'Code and mutation should not differ more than 35% of its possible range space')
 
     def test_sample_integer_type(self):
         # Arrange
@@ -152,11 +158,12 @@ class FeatureTypeTest(unittest.TestCase):
 
                 # Assert
                 if code - mutation < 0.001:
-                    #print('Code: %s, mut: %s' % (code, mutation))
+                    # print('Code: %s, mut: %s' % (code, mutation))
                     occurances_no_change += 1
                 self.assertLessEqual(mutation, ul)
                 self.assertGreaterEqual(mutation, ll)
-                self.assertLess(code - mutation, 0.35 * range_diff, 'Code and mutation should not differ more than 35% of its possible range space')
+                self.assertLess(code - mutation, 0.35 * range_diff,
+                                'Code and mutation should not differ more than 35% of its possible range space')
 
             # self.assertLessEqual(occurances_no_change, (2 * repetitions) / range_diff, 'Expecting the number of actual mutations with change to be way more. Possible range diff is %s' % range_diff)
 
@@ -166,7 +173,8 @@ class FeatureTypeTest(unittest.TestCase):
 
         # Act
         for size in sizes:
-            set_type = _build_feature_set(size, [ft.UnitFloat, ft.NaturalInteger, ft.NaturalFloat, ft.FloatType(-10, 8)])
+            set_type = _build_feature_set(size,
+                                          [ft.UnitFloat, ft.NaturalInteger, ft.NaturalFloat, ft.FloatType(-10, 8)])
             sample = set_type.sample_random()
 
             # Assert
@@ -174,12 +182,73 @@ class FeatureTypeTest(unittest.TestCase):
             print(sample)
             print()
 
+    def test_code_fits_IntegerType(self):
+
+        # Arrange
+        ranges = [
+            (-1, 1),
+            (0, 2),
+            (1, 10),
+            (-10, -1),
+            (-5, 2),
+            (-3, 12)
+        ]
+
+        codes = [
+            -1,
+            0,
+            10,
+            -1,
+            0,
+            11
+        ]
+
+        # Act
+        for i in range(len(ranges)):
+            lr, ur = ranges[i]
+            integer_type = ft.IntegerType(lr, ur)
+            result = integer_type.fits(codes[i])
+
+            # Assert
+            self.assertTrue(result)
+
+    def test_code_fits_FloatType(self):
+
+        # Arrange
+        ranges = [
+            (-1, 1.5),
+            (0, 2),
+            (1, 10),
+            (-10.6, -1),
+            (-5, 2.3),
+            (-3.9, 12.5)
+        ]
+
+        codes = [
+            -1,
+            0.1,
+            9.9,
+            -1.91,
+            0,
+            11.6
+        ]
+
+        # Act
+        for i in range(len(ranges)):
+            lr, ur = ranges[i]
+            float_type = ft.FloatType(lr, ur)
+            result = float_type.fits(codes[i])
+
+            # Assert
+            self.assertTrue(result)
+
 
 def _build_feature_set(size, base_types):
     feature_set = {}
     remaining_length = size
     base_feature_keys = random.sample(
-        [''.join(cs) for cs in itertools.product(string.ascii_lowercase, repeat=math.ceil(math.log(size, len(string.ascii_lowercase))))],
+        [''.join(cs) for cs in
+         itertools.product(string.ascii_lowercase, repeat=math.ceil(math.log(size, len(string.ascii_lowercase))))],
         size
     )
 
