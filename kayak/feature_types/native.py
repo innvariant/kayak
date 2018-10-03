@@ -128,6 +128,21 @@ class FeatureSet(FeatureType):
                 raise ValueError('Unknown type for feature: %s' % ftype)
         return code
 
+    def fits(self, code, start):
+        subfeatures = self.get_features()
+        for name in subfeatures:
+            ftype = subfeatures[name]
+            size = len(ftype)
+            if size == 1:
+                if not ftype.fits(code, start):
+                    return False
+                start = start + 1
+            else:
+                ftype.fits(code, start)
+                start = start + size
+
+        return True
+
     def __str__(self):
         return 'featureset[' + ','.join([str(self._features[n]) for n in self._features]) + ']'
 

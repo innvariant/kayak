@@ -280,7 +280,7 @@ class FeatureTypeTest(unittest.TestCase):
         for i in range(len(feature_set_list)):
             feature_set = feature_set_list[i]
             code = code_list[i]
-            result = feature_set.fits(code)
+            result = feature_set.fits(code, 0)
 
             #Assert
 
