@@ -242,6 +242,56 @@ class FeatureTypeTest(unittest.TestCase):
             # Assert
             self.assertTrue(result)
 
+    def test_code_fits_FeatureSet(self):
+
+        # Arrange
+        feature_set_1 = ft.FeatureSet({
+            'a': ft.IntegerType(1, 10),
+            'b': ft.FloatType(-10.6, 5.3),
+            'c': ft.IntegerType(0, 16)
+        })
+
+        feature_set_2 = ft.FeatureSet({
+            'a': ft.FeatureSet({
+                'b': ft.FloatType(-14.5 , -10),
+                'c': ft.IntegerType(1, 15)
+            })
+        })
+
+        feature_set_3 = ft.FeatureSet({
+            'a': ft.IntegerType(9, 16),
+            'b': ft.FeatureSet({
+                'c': ft.FloatType(-10.6, 5.3),
+                'd': ft.IntegerType(9, 18)
+            }),
+            'e': ft.FloatType(10, 16.8),
+            'f': ft.IntegerType(15, 19)
+        })
+
+        feature_set_list = [feature_set_1, feature_set_2, feature_set_3]
+
+        code_1 = [8, 3.5, 0]
+        code_2 = [-11.4, 2]
+        code_3 = [10, 5.2, 9, 16.7, 16]
+
+        code_list = [code_1, code_2, code_3]
+
+        # Act
+        for i in range(len(feature_set_list)):
+            feature_set = feature_set_list[i]
+            code = code_list[i]
+            result = feature_set.fits(code)
+
+            #Assert
+
+            self.assertTrue(result)
+
+
+
+
+
+
+
 
 def _build_feature_set(size, base_types):
     feature_set = {}
