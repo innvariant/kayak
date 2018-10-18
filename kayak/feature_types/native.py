@@ -195,7 +195,7 @@ class IntegerType(FeatureType):
             code = extract_single_native_value(code)
         except ValueError:
             return False
-        return self._lower_border <= code <= self._upper_border
+        return type(code) == int and self._lower_border <= code <= self._upper_border
 
     def __str__(self):
         return 'int(%.2f, %.2f)' % (self._lower_border, self._upper_border)
