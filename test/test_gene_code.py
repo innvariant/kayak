@@ -4,6 +4,17 @@ import kayak.feature_types as ft
 import numpy
 
 class GeneCodeTest(unittest.TestCase):
+    """
+    Tests GeneCode as an independent component / class.
+    A GeneCode wraps a numpy array and its associated genetic encoding and is thus able to
+    provide several methods on basis of both information, e.g. by checking if code and space
+    fit together.
+    In comparison to a feature code a GeneCode always has to be associated with a genetic encoding
+    space description (kayak.GeneticEncoding) while a feature code might be a native python or
+    numpy object which fits into a feature type. A GeneCode consists of a larger numpy array (the
+    actual gene code) which can be split into sub-codes based on the description provided by a
+    genetic encoding space description.
+    """
     def test_init_fail(self):
         """
         Constructing a gene code with a space it does not fit in has to raise an exception.
