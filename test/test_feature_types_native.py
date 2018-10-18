@@ -243,7 +243,6 @@ class FeatureTypeTest(unittest.TestCase):
             self.assertTrue(result)
 
     def test_code_fits_FeatureSet(self):
-
         # Arrange
         feature_set_1 = ft.FeatureSet({
             'a': ft.IntegerType(1, 10),
@@ -280,17 +279,10 @@ class FeatureTypeTest(unittest.TestCase):
         for i in range(len(feature_set_list)):
             feature_set = feature_set_list[i]
             code = code_list[i]
-            result = feature_set.fits(code, 0)
+            result = feature_set.fits(code)
 
-            #Assert
-
-            self.assertTrue(result)
-
-
-
-
-
-
+            # Assert
+            self.assertTrue(result, 'Code %s does not fit into feature set %s' % (code, feature_set))
 
 
 def _build_feature_set(size, base_types):

@@ -2,6 +2,17 @@ import random
 import numpy as np
 from .. import export
 
+def extract_single_native_value(code):
+    try:
+        # Given code might be wrapped in a list / numpy array
+        size = len(code)
+        if size > 1:
+            # We expect a single dimension
+            raise ValueError('Expecting a single dimension in code')
+        else:
+            return code[0]
+    except TypeError:
+        return code
 
 @export
 class FeatureType(object):
@@ -62,7 +73,7 @@ class FeatureType(object):
         """
         raise NotImplementedError()
 
-    def fits(self, code, start):
+    def fits(self, code):
         """
 
         :param code: numpy array
@@ -128,18 +139,26 @@ class FeatureSet(FeatureType):
                 raise ValueError('Unknown type for feature: %s' % ftype)
         return code
 
-    def fits(self, code, start):
+    def fits(self, code):
         subfeatures = self.get_features()
+        subfeature_offset = 0
+        code_length = len(code)
+
         for name in subfeatures:
             ftype = subfeatures[name]
             size = len(ftype)
-            if size == 1:
-                if not ftype.fits(code, start):
-                    return False
-                start = start + 1
-            else:
-                ftype.fits(code, start)
-                start = start + size
+
+            next_subfeature_offset = subfeature_offset + size
+            if code_length < next_subfeature_offset:
+                # The current subfeature does not fit into the remaining code length anymore
+                return False
+
+            subfeature_code = code[subfeature_offset:next_subfeature_offset]
+            if not ftype.fits(subfeature_code):
+                # The current code slice does not fit the expected feature type
+                return False
+
+            subfeature_offset = next_subfeature_offset
 
         return True
 
@@ -171,8 +190,12 @@ class IntegerType(FeatureType):
             mutation = self._lower_border
         return mutation
 
-    def fits(self, code, start):
-        return self._lower_border <= code[start] <= self._upper_border and type(code[start]) == int
+    def fits(self, code):
+        try:
+            code = extract_single_native_value(code)
+        except ValueError:
+            return False
+        return self._lower_border <= code <= self._upper_border
 
     def __str__(self):
         return 'int(%.2f, %.2f)' % (self._lower_border, self._upper_border)
@@ -202,9 +225,12 @@ class FloatType(FeatureType):
             mutation = self._lower_border
         return mutation
 
-    def fits(self, code, start):
-        code_1 = float(code[start])
-        return self._lower_border <= code_1  <= self._upper_border
+    def fits(self, code):
+        try:
+            code = extract_single_native_value(code)
+        except ValueError:
+            return False
+        return self._lower_border <= code <= self._upper_border
 
     def __str__(self):
         return 'float(%.2f, %.2f)' % (self._lower_border, self._upper_border)
