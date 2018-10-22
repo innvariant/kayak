@@ -48,8 +48,24 @@ class GeneticEncoding(object):
             # Unwrap the code if it is contained within a GeneCode object.
             return self.contains(code.as_numpy())
 
-        # TODO implement
-        pass
+        subfeature_offset = 0
+        code_length = len(code)
+
+        for feature in self._features:
+            ftype = feature['type']
+            size = len(ftype)
+
+            next_subfeature_offset = subfeature_offset + size
+            if code_length < next_subfeature_offset:
+                return False
+
+            subfeature_code = code[subfeature_offset:next_subfeature_offset]
+            if not ftype.fits(subfeature_code):
+                return False
+
+            subfeature_offset = next_subfeature_offset
+
+        return True
 
     def add_feature(self, name: str, feature):
         if self.has_feature(name):
@@ -57,8 +73,8 @@ class GeneticEncoding(object):
         next_position = len(self._features)
         previous_feature = self._features[-1] if len(self._features) > 0 else None
         next_offset = previous_feature['offset'] + len(previous_feature['type']) if previous_feature is not None else 0
-        one_hot_encoding = any(hasattr(f, '__len__') and len(f) > 1 for f in feature) if len(feature) > 1 else False
-        self._features.append({'name': name, 'type': feature, 'offset': next_offset, 'one_hot': one_hot_encoding})
+        #one_hot_encoding = any(hasattr(f, '__len__') and len(f) > 1 for f in feature) if len(feature) > 1 else False
+        self._features.append({'name': name, 'type': feature, 'offset': next_offset})
         self._features_by_pos = {name: next_position}
 
     def has_feature(self, name: str):
