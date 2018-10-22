@@ -114,3 +114,24 @@ class GeneCodeTest(unittest.TestCase):
 
         # Assert
         self.assertTrue(result)
+
+    def test_genecode_contains_code_fail(self):
+
+        # Arrange
+        space = kayak.GeneticEncoding('test', '1.2.0')
+
+        space.add_feature('outer_1', ft.FeatureSet({
+            'inner_1': ft.IntegerType(10, 15),
+            'inner_2': ft.FloatType(1, 5.3)
+        }))
+        space.add_feature('outer_2', ft.FloatType(0, 15))
+        code_val_0 = 10.6
+        code_val_1 = 3.4
+        code_val_3 = 16
+        code = [code_val_0, code_val_1, code_val_3]
+
+        # Act
+        result = space.contains(code)
+
+        # Assert
+        self.assertFalse(result)
