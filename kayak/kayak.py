@@ -3,6 +3,7 @@ import numpy
 import semantic_version
 from .feature_types import FeatureType
 from .feature_types import FeatureSet
+from .feature_types import FeatureList
 from . import export
 
 @export
@@ -89,6 +90,7 @@ class GeneticEncoding(object):
 
     def _get_dimensions(self, feature):
         required_feature_size = len(feature)  # applies for list or FeatureType
+        return required_feature_size
 
     def sample_random(self):
         code = []
@@ -96,9 +98,8 @@ class GeneticEncoding(object):
             feature_name = feature['name']
             feature_type = feature['type']
             offset = feature['offset']
-            one_hot = feature['one_hot']
 
-            code.extend(_sample_random_from_feature(feature_type, one_hot=one_hot))
+            code.extend(_sample_random_from_feature(feature_type))
 
         return GeneCode(code, self)
 
@@ -148,7 +149,7 @@ def _map_feature(feature_name, feature_type, code, offset=0, one_hot=False):
         return {}
 
 
-def _sample_random_from_feature(feature_type, one_hot=False):
+def _sample_random_from_feature(feature_type):
     if type(feature_type) is type and issubclass(feature_type, FeatureType):
         raise ValueError('Expecting an instance of FeatureType, not the class.')
     elif isinstance(feature_type, FeatureSet):
@@ -158,15 +159,9 @@ def _sample_random_from_feature(feature_type, one_hot=False):
             code.extend(_sample_random_from_feature(subfeature_type))
         return code
     elif isinstance(feature_type, FeatureType):
-        return [feature_type.sample_random()]
-    elif isinstance(feature_type, list):
-        if one_hot:
-            list_choice = random.randint(0, len(feature_type) - 1)
-            code = [list_choice]
-            code.extend(_sample_random_from_feature(feature_type[list_choice]))
-            return code
-        else:
-            return _sample_random_from_feature(random.choice(feature_type))
+        code = []
+        code.extend(feature_type.sample_random())
+        return code
     else:
         # Unknown type, so it might be a fixed value we return as sample
         return [feature_type]
