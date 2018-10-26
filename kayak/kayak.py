@@ -168,7 +168,7 @@ def _sample_random_from_feature(feature_type, one_hot=False):
         else:
             return _sample_random_from_feature(random.choice(feature_type))
     else:
-        # Unknwon type, so it might be a fixed value we return as sample
+        # Unknown type, so it might be a fixed value we return as sample
         return [feature_type]
         # raise NotImplementedError('Unknown feature type for sampling.')
 

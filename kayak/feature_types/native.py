@@ -2,6 +2,7 @@ import random
 import numpy as np
 from .. import export
 
+
 def extract_single_native_value(code):
     try:
         # Given code might be wrapped in a list / numpy array
@@ -13,6 +14,13 @@ def extract_single_native_value(code):
             return code[0]
     except TypeError:
         return code
+
+
+def pythonic_to_object_description(description, order=None):
+    if type(description) is dict:
+        # {'b': int, 'a': float}, ['a', 'b'] -> FeatureSet({'a': float, 'b': int}, ['a', 'b'])
+        new_description = FeatureSet()
+
 
 @export
 class FeatureType(object):
@@ -96,21 +104,29 @@ class FeatureSet(FeatureType):
      A feature containing multiple sub-feature_types within a genetic encoding space.
      Single values of this set can only be mutated together.
     """
-    def __init__(self, features):
-        self._features = features
-        '''
-         {
-          'a': ft.NaturalInt,
-          'b': ft.FeatureSet({
-           'x': ft.NaturalFloat,
-           'y': [1, 2, 3]
-          }),
-          [
-           ft.NaturalInt,
-           ft.FeatureSet({'i': ft.NaturalFloat, 'j': ft.NaturalInt })
-          ]
-         }
-        '''
+    def __init__(self, feature_description, order:list=None):
+        """
+            ```
+            FeatureSet({
+                'b': ft.int,
+                'a': [ {ft.int, ft.float}, ft.float ],
+                'c': [
+                    { 'x': ft.int, 'y': ft.float },
+                    { 'u': ft.float, 'v': ft.int }
+                ]
+            })
+            ```
+
+        :param feature_description:
+        :param order:
+        """
+        if order is None:
+            order = sorted(feature_description.keys())
+        elif set(feature_description.keys()) != set(order):
+            raise ValueError('Your order list for your feature names do not match up')
+
+        self._feature_names = order
+        self._features = feature_description
 
     def get_features(self):
         return self._features
@@ -242,3 +258,7 @@ class FloatType(FeatureType):
 NaturalInteger = IntegerType(1, 5000)
 NaturalFloat = FloatType(1, 100)
 UnitFloat = FloatType(0, 1)
+int = IntegerType
+float = FloatType
+natint = NaturalInteger
+natfloat = NaturalFloat
