@@ -254,6 +254,54 @@ class FloatType(FeatureType):
     def __len__(self):
         return 1
 
+@export
+class FeatureList(FeatureType):
+
+    def __init__(self, features, encoding):
+        self._features = features
+        self._encoding = encoding
+        '''
+        [
+        ft.FeatureSet({'x1': ft.NaturalInteger, 'x2': ft.NaturalInteger}),
+        ft.FeatureSet({'x3': ft.NaturalFloat, 'x4': ft.NaturalInteger, 'x5': ft.NaturalFloat})
+        ]
+
+        '''
+
+    def cross_over(self, code1, code2):
+        pass
+
+    def _mutate_random(self, code):
+        pass
+
+    def sample_random(self):
+
+        code = []
+        feature_list = self._features
+        encoding = self._encoding
+
+        if encoding == 'DYNAMIC':
+            list_choice = random.randint(0, len(feature_list) - 1)
+            code = [list_choice]
+            code.extend(feature_list[list_choice].sample_random())
+            return code
+
+        elif encoding == 'ONE_HOT':
+            #One Hot Encoding
+            raise NotImplementedError('The one_hot_encoding option is not implemented.')
+
+        elif encoding == 'MAX_OPTION':
+            #Maximum Option Encoding
+            raise NotImplementedError('The maximum_option_encoding option is not implemented.')
+        else:
+            raise ValueError('Wrong type of encoding.')
+
+    def fits(self, code):
+        pass
+
+    def __len__(self):
+        return len(self._features)
+
 
 NaturalInteger = IntegerType(1, 5000)
 NaturalFloat = FloatType(1, 100)
