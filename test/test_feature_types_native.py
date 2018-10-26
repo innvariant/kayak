@@ -324,6 +324,19 @@ class FeatureTypeTest(unittest.TestCase):
             # Assert
             self.assertFalse(result, 'Code %s may not fit into feature set %s' % (code, feature_set))
 
+    def test_sample_feature_list_success(self):
+        #Arrange
+        feature_list = ft.FeatureList([ft.FeatureSet({'x1': ft.NaturalInteger, 'x2': ft.NaturalInteger}),
+                                       ft.FeatureSet({'x3': ft.NaturalFloat, 'x4': ft.NaturalInteger,
+                                                      'x5': ft.NaturalFloat})],
+                                      encoding='DYNAMIC')
+
+        #Act
+        result = feature_list.sample_random()
+
+        #Assert
+        print(result)
+
 
 def _build_feature_set(size, base_types):
     feature_set = {}
