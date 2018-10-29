@@ -22,13 +22,14 @@ if KAYAK_NETWORKX:
             if nodes % 1 != 0:
                 # We have no quadratic code size, so it is no valid adjacency matrix for a graph
                 return False
+            nodes = int(nodes)  # make sure it is an integer
 
             if nodes > self._nodes:
                 # Graph is too big for this feature type
                 return False
 
             numpy_matrix = np.reshape(np.array(code), [nodes, nodes])
-            nx.from_numpy_matrix(numpy_matrix)
+            nx.from_numpy_array(numpy_matrix)
             return True
 
         def sample_random(self):
@@ -37,11 +38,11 @@ if KAYAK_NETWORKX:
             :rtype: np.ndarray
             """
             sampled_graph = nx.erdos_renyi_graph(self._nodes, self._prob)
-            return nx.to_numpy_matrix(sampled_graph)
+            return nx.to_numpy_array(sampled_graph)
 
         def cross_over(self, code1, code2):
             """
-    
+
             :param code1:
             :type code1 kayak.GeneCode|list|numpy.array
             :param code2:
@@ -51,6 +52,8 @@ if KAYAK_NETWORKX:
             """
             raise NotImplementedError()
 
+        def __len__(self):
+            return self._nodes
 
 
     @export
