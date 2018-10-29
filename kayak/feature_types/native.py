@@ -328,7 +328,13 @@ class FeatureList(FeatureType):
             raise ValueError('Wrong type of encoding.')
 
     def fits(self, code):
-        pass
+        index = code[0]
+        feature = self._features[index]
+        code = code[1:]
+        if not feature.fits(code):
+            return False
+
+        return True
 
     def __len__(self):
         return len(self._features)
