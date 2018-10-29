@@ -64,7 +64,7 @@ class FeatureType(object):
             code = np.array(code)  # numpy array accepts almost all objects
 
         if len(self) is not len(code):
-            raise ValueError('Can not mutate code which does not fit this set type!')
+            raise ValueError('Can not mutate code which does not fit this feature type!')
 
         return self._mutate_random(code)
 
@@ -73,9 +73,6 @@ class FeatureType(object):
 
     def sample_random(self):
         """
-
-        :param code:
-        :type code kayak.GeneCode|list|numpy.array
         :return:
         :rtype: kayak.GeneCode
         """
