@@ -116,11 +116,16 @@ class FeatureSetTest(unittest.TestCase):
             'a': [ft.unitfloat, ft.natint],
             'x': ft.natfloat
         }
-        code = [0.1, 3.8, 5]
+        codes = [
+            [0, 0.1, 3.8, 5],
+            [1, 10, 4.3, 20],
+            [0, 0.9, 12.2, 100]
+        ]
         feature_set = ft.FeatureSet(feature_set_description)
 
-        # Act
-        fits = feature_set.fits(code)
+        for code in codes:
+            # Act
+            fits = feature_set.fits(code)
 
-        # Assert
-        self.assertTrue(fits)
+            # Assert
+            self.assertTrue(fits, 'Code %s fits not in %s' % (code, feature_set_description))

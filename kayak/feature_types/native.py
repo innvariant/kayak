@@ -193,27 +193,44 @@ class FeatureSet(FeatureType):
         code_length = len(code)
 
         for ftype in self:
-            size = len(ftype)
+            if not isinstance(ftype, FeatureType):
+                # We have a native python type, e.g. a string or a number, not a feature type
+                next_subfeature_offset = subfeature_offset + 1
+                subfeature_code = code[subfeature_offset:next_subfeature_offset]
+                if not subfeature_code == ftype:
+                    return False
+                subfeature_offset = next_subfeature_offset
+            else:
+                # We have a feature type which might reserve a certain code size
+                # For dynamic feature types (e.g. lists) we must iteratively check different code sizes
+                feature_size = len(ftype)
 
-            next_subfeature_offset = subfeature_offset + size
-            if code_length < next_subfeature_offset:
-                # The current subfeature does not fit into the remaining code length anymore
-                return False
+                if feature_size is 1:
+                    next_subfeature_offset = subfeature_offset + 1
+                    subfeature_code = code[subfeature_offset:next_subfeature_offset]
+                    if not ftype.fits(subfeature_code):
+                        return False
+                    subfeature_offset = next_subfeature_offset
+                else:
+                    check_feature_size = feature_size
+                    subfeature_fits = False
+                    while check_feature_size > 0 and not subfeature_fits:
+                        next_subfeature_offset = min(subfeature_offset + check_feature_size, code_length)
+                        subfeature_code = code[subfeature_offset:next_subfeature_offset]
+                        if ftype.fits(subfeature_code):
+                            subfeature_fits = True
+                            subfeature_offset = next_subfeature_offset
+                        check_feature_size -= 1
 
-            subfeature_code = code[subfeature_offset:next_subfeature_offset]
-            if not ftype.fits(subfeature_code):
-                # The current code slice does not fit the expected feature type
-                return False
-
-            subfeature_offset = next_subfeature_offset
-
+                    if not subfeature_fits:
+                        return False
         return True
 
     def __str__(self):
         return 'set{' + ','.join([str(feat) for feat in self]) + '}'
 
     def __len__(self):
-        return sum(len(self._features[name]) for name in self._features)
+        return sum(len(feat) for feat in self)
 
 
 @export
