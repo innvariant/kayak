@@ -106,6 +106,7 @@ class FeatureSet(FeatureType):
     """
     def __init__(self, feature_description, order:list=None):
         """
+
             ```
             FeatureSet({
                 'b': ft.int,
@@ -117,9 +118,22 @@ class FeatureSet(FeatureType):
             })
             ```
 
+            Initializing with a list must not be confused with initializing a feature list!
+            ```
+            FeatureSet([ft.int, ft.float])
+            ```
+
         :param feature_description:
         :param order:
         """
+        if type(feature_description) is set:
+            raise ValueError('We need a deterministic feature name ordering. You can not initialize feature sets with a simple set.')
+
+        # We can either initialize with a list or a dict
+        if type(feature_description) is list:
+            # For sets we need to generate keys / feature names and then create the dict out of it
+            feature_description = {numeric_key: feature for numeric_key, feature in zip(range(len(feature_description)), feature_description)}
+
         if order is None:
             order = sorted(feature_description.keys())
         elif set(feature_description.keys()) != set(order):
@@ -128,7 +142,11 @@ class FeatureSet(FeatureType):
         self._feature_names = order
         self._features = feature_description
 
+    def __next__(self):
+        pass
+
     def get_features(self):
+        # TODO do we want to provide such transparent access? might deprecate
         return self._features
 
     def _mutate_random(self, code):
@@ -306,7 +324,7 @@ class FeatureList(FeatureType):
 NaturalInteger = IntegerType(1, 5000)
 NaturalFloat = FloatType(1, 100)
 UnitFloat = FloatType(0, 1)
-int = IntegerType
-float = FloatType
 natint = NaturalInteger
 natfloat = NaturalFloat
+unitint = IntegerType(0, 1)
+unitfloat = FloatType(0, 1)
