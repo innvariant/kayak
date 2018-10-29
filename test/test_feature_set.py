@@ -128,4 +128,29 @@ class FeatureSetTest(unittest.TestCase):
             fits = feature_set.fits(code)
 
             # Assert
-            self.assertTrue(fits, 'Code %s fits not in %s' % (code, feature_set_description))
+            self.assertTrue(fits, 'Code %s should fit in %s' % (code, feature_set_description))
+
+    def test_deeper_nested_code_fits_success(self):
+        # Arrange
+        # Note that the descr is not alphabetically sorted, but the code must still fit for default behaviour
+        feature_set_description = {
+            'a': ft.natint,
+            'b': [
+                {ft.unitfloat, ft.natint, ft.unitfloat},
+                {ft.natint, ft.natint}
+            ],
+            'c': ft.natfloat
+        }
+        codes = [
+            [10, 0, 0.1, 10, 0.1, 5.3],
+            [20, 0, 0.2, 20, 0.2, 7.9],
+            [30, 1, 30, 30, 12.8]
+        ]
+        feature_set = ft.FeatureSet(feature_set_description)
+
+        for code in codes:
+            # Act
+            fits = feature_set.fits(code)
+
+            # Assert
+            self.assertTrue(fits, 'Code %s should fit in %s' % (code, feature_set_description))
