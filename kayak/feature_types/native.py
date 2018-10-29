@@ -142,8 +142,15 @@ class FeatureSet(FeatureType):
         self._feature_names = order
         self._features = feature_description
 
-    def __next__(self):
-        pass
+    def __getitem__(self, item):
+        if type(item) is int:
+            if item >= len(self._feature_names):
+                raise IndexError('Index exceeds number of features in set.')
+            return self._features[self._feature_names[item]]
+        elif item in self._feature_names:
+            return self._features[item]
+        else:
+            raise ValueError('Unknown feature %s' % item)
 
     def get_features(self):
         # TODO do we want to provide such transparent access? might deprecate
@@ -174,12 +181,10 @@ class FeatureSet(FeatureType):
         return code
 
     def fits(self, code):
-        subfeatures = self.get_features()
         subfeature_offset = 0
         code_length = len(code)
 
-        for name in subfeatures:
-            ftype = subfeatures[name]
+        for ftype in self:
             size = len(ftype)
 
             next_subfeature_offset = subfeature_offset + size
