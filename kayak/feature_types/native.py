@@ -139,6 +139,14 @@ class FeatureSet(FeatureType):
         elif set(feature_description.keys()) != set(order):
             raise ValueError('Your order list for your feature names do not match up')
 
+        # Transform each pythonic feature representation into an object-representation
+        for name in feature_description:
+            ftype = feature_description[name]
+            if type(ftype) is list:
+                feature_description[name] = FeatureList(ftype, encoding='DYNAMIC')  # TODO remove optional argument
+            elif type(ftype) is dict:
+                feature_description[name] = FeatureSet(ftype)
+
         self._feature_names = order
         self._features = feature_description
 
@@ -202,7 +210,7 @@ class FeatureSet(FeatureType):
         return True
 
     def __str__(self):
-        return 'featureset[' + ','.join([str(self._features[n]) for n in self._features]) + ']'
+        return 'set{' + ','.join([str(feat) for feat in self]) + '}'
 
     def __len__(self):
         return sum(len(self._features[name]) for name in self._features)
@@ -331,5 +339,4 @@ NaturalFloat = FloatType(1, 100)
 UnitFloat = FloatType(0, 1)
 natint = NaturalInteger
 natfloat = NaturalFloat
-unitint = IntegerType(0, 1)
 unitfloat = FloatType(0, 1)

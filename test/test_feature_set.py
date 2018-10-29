@@ -77,7 +77,7 @@ class FeatureSetTest(unittest.TestCase):
             'y': ft.natfloat,
             'x': ft.unitfloat,
             'a': ft.natint,
-            'b': ft.unitint
+            'b': ft.natfloat
         }
         feature_set = ft.FeatureSet(set_description)
 
@@ -95,7 +95,7 @@ class FeatureSetTest(unittest.TestCase):
             'y': ft.natfloat,
             'x': ft.unitfloat,
             'a': ft.natint,
-            'b': ft.unitint
+            'b': ft.natfloat
         }
         set_order = ['b', 'a', 'y', 'x']
         feature_set = ft.FeatureSet(set_description, order=set_order)
@@ -107,3 +107,20 @@ class FeatureSetTest(unittest.TestCase):
 
         # Assert
         self.assertListEqual(expected_feature_list, iteration_list)
+
+    def test_nested_code_fits_success(self):
+        # Arrange
+        # Note that the descr is not alphabetically sorted, but the code must still fit for default behaviour
+        feature_set_description = {
+            'y': ft.natint,
+            'a': [ft.unitfloat, ft.natint],
+            'x': ft.natfloat
+        }
+        code = [0.1, 3.8, 5]
+        feature_set = ft.FeatureSet(feature_set_description)
+
+        # Act
+        fits = feature_set.fits(code)
+
+        # Assert
+        self.assertTrue(fits)
