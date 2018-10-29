@@ -337,6 +337,21 @@ class FeatureTypeTest(unittest.TestCase):
         #Assert
         print(result)
 
+    def test_code_fits_feature_list(self):
+
+        #Arrange
+        feature_list = ft.FeatureList([ft.FeatureList([ft.NaturalInteger, ft.NaturalFloat], encoding='DYNAMIC'), ft.NaturalFloat], encoding='DYNAMIC')
+
+        code = [0, 1, 3.8]
+
+        #Act
+        result = feature_list.fits(code)
+
+
+        #Assert
+
+        self.assertTrue(result)
+
 
 def _build_feature_set(size, base_types):
     feature_set = {}
