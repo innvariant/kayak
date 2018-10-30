@@ -2,15 +2,15 @@ import time
 import numpy as np
 import itertools
 import unittest
+import networkx as nx
 import kayak.feature_types as ft
 import kayak.feature_types.graph as fg
 
 
 class GraphTypePerformanceTest(unittest.TestCase):
-
     def test_fits_timing(self):
         # Arrange
-        graph_sizes = np.arange(500, 10100, 500)
+        graph_sizes = np.arange(500, 5500, 500)
         connection_probabilities = np.arange(0.1, 1, 0.2)
 
         for prob, graph_size in itertools.product(connection_probabilities, graph_sizes):
