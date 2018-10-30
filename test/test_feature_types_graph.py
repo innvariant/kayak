@@ -1,6 +1,5 @@
 import unittest
 import networkx as nx
-import kayak
 import kayak.feature_types as ft
 import kayak.feature_types.graph as fg
 
