@@ -66,6 +66,28 @@ class FeatureTypeTest(unittest.TestCase):
             print('Expected: %s' % length)
             print('Length is: %s' % len(feature_set))
 
+
+    def test_length_feature_list(self):
+        # Arrange
+
+        feature_lists = [ft.FeatureList([ft.FeatureSet({'a': ft.unitfloat, 'b': ft.NaturalInteger, 'c': ft.NaturalFloat}), ft.unitfloat]),
+                         ft.FeatureList([ft.NaturalInteger, ft.unitfloat]),
+                         ft.FeatureList([ft.FeatureSet({'a': ft.unitfloat, 'b': ft.NaturalInteger, 'c': ft.NaturalFloat,
+                                                        'd': ft.NaturalFloat, 'f': ft.NaturalFloat}),
+                                         ft.FeatureList([ft.FeatureSet({'a': ft.unitfloat, 'b': ft.NaturalInteger,
+                                                                        'c': ft.NaturalFloat}),
+                                                         ft.FeatureSet({'a': ft.unitfloat, 'b': ft.NaturalInteger,
+                                                                        'c': ft.NaturalFloat, 'd': ft.NaturalFloat})])])
+                         ]
+
+        lengths = [3, 1, 5]
+
+        # Act
+        for feature_list, length in zip(feature_lists, lengths):
+            result = len(feature_list)
+            # Assert
+            self.assertEqual(length, result)
+
     def test_sample_float_type(self):
         # Arrange
         ranges = [
