@@ -139,13 +139,16 @@ class GeneCodeTest(unittest.TestCase):
     def test_sample_genespace(self):
 
         space = kayak.GeneticEncoding('test', '1.2.0')
-        space.add_feature('outer_1', ft.FeatureList([ft.IntegerType(10, 15), ft.FloatType(1, 5.3)], encoding='DYNAMIC'))
+        space.add_feature('outer_1', ft.FeatureList([ft.IntegerType(10, 15), ft.FloatType(1, 5.3)],
+                                                    encoding=ft.encoding_dynamic))
         space.add_feature('outer_2', ft.FloatType(0, 15))
         space.add_feature('outer_3', ft.FeatureSet({
             'inner_1': ft.IntegerType(14, 15),
             'inner_2': ft.FeatureSet({
                 'inner_1': ft.IntegerType(10, 15),
-                'inner_2': ft.FloatType(1, 5.3)
+                'inner_2': ft.FloatType(1, 5.3),
+                'inner_3': ft.FeatureList([ft.FeatureList([ft.NaturalInteger, ft.NaturalFloat],
+                                                          encoding=ft.encoding_dynamic)], encoding=ft.encoding_dynamic)
             })
         }))
 
