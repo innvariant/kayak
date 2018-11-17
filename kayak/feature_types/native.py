@@ -140,7 +140,8 @@ class FeatureSet(FeatureType):
         for name in feature_description:
             ftype = feature_description[name]
             if type(ftype) is list:
-                feature_description[name] = FeatureList(ftype, encoding='DYNAMIC')  # TODO remove optional argument
+                feature_description[name] = FeatureList(ftype)
+
             elif type(ftype) is dict:
                 feature_description[name] = FeatureSet(ftype)
 
@@ -302,16 +303,36 @@ class FloatType(FeatureType):
 @export
 class FeatureList(FeatureType):
 
-    def __init__(self, features, encoding):
-        self._features = features
-        self._encoding = encoding
-        '''
+    def __init__(self, feature_description, encoding=None):
+
+        """
         [
         ft.FeatureSet({'x1': ft.NaturalInteger, 'x2': ft.NaturalInteger}),
         ft.FeatureSet({'x3': ft.NaturalFloat, 'x4': ft.NaturalInteger, 'x5': ft.NaturalFloat})
         ]
 
-        '''
+        """
+
+        for i in range(len(feature_description)):
+            ftype = feature_description[i]
+            if type(ftype) is list:
+                feature_description[i] = FeatureList(ftype)
+
+            elif type(ftype) is dict:
+                feature_description[i] = FeatureSet(ftype)
+
+        if encoding is None:
+            self._encoding = encoding_dynamic
+        else:
+            self._encoding = encoding
+
+        self._features = feature_description
+
+    def __getitem__(self, item):
+        if type(item) is int:
+            if item >= len(self._features):
+                raise IndexError('Index exceeds number of features in set.')
+            return self._features[item]
 
     def cross_over(self, code1, code2):
         pass
@@ -325,17 +346,17 @@ class FeatureList(FeatureType):
         feature_list = self._features
         encoding = self._encoding
 
-        if encoding == 'DYNAMIC':
+        if encoding == encoding_dynamic:
             list_choice = random.randint(0, len(feature_list) - 1)
             code = [list_choice]
             code.extend(feature_list[list_choice].sample_random())
             return code
 
-        elif encoding == 'ONE_HOT':
+        elif encoding == encoding_one_hot:
             #One Hot Encoding
             raise NotImplementedError('The one_hot_encoding option is not implemented.')
 
-        elif encoding == 'MAX_OPTION':
+        elif encoding == encoding_max_option:
             #Maximum Option Encoding
             raise NotImplementedError('The maximum_option_encoding option is not implemented.')
         else:
@@ -360,3 +381,6 @@ UnitFloat = FloatType(0, 1)
 natint = NaturalInteger
 natfloat = NaturalFloat
 unitfloat = FloatType(0, 1)
+encoding_one_hot = 'ONE_HOT'
+encoding_dynamic = 'DYNAMIC'
+encoding_max_option = 'MAX_OPTION'
