@@ -379,6 +379,18 @@ class FeatureTypeTest(unittest.TestCase):
 
         self.assertTrue(result)
 
+    def test_convert_description_feature_list(self):
+
+        # Arrange
+        list = [{'a': ft.unitfloat, 'b': ft.natint}]
+
+        # Act
+
+        feature_list = ft.FeatureList(list)
+
+        # Assert
+        print(feature_list)
+
 
 def _build_feature_set(size, base_types):
     feature_set = {}
