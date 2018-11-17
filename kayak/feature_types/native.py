@@ -372,7 +372,14 @@ class FeatureList(FeatureType):
         return True
 
     def __len__(self):
-        return len(self._features)
+
+        length_list = []
+        for feature in self._features:
+            length_list.append(len(feature))
+        return max(length_list)
+
+    def __str__(self):
+        return 'list[' + ','.join([str(feat) for feat in self]) + ']'
 
 
 NaturalInteger = IntegerType(1, 5000)
