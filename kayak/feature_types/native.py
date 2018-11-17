@@ -210,7 +210,7 @@ class FeatureSet(FeatureType):
                         return False
                     subfeature_offset = next_subfeature_offset
                 else:
-                    check_feature_size = feature_size
+                    check_feature_size = feature_size + 1
                     subfeature_fits = False
                     while check_feature_size > 0 and not subfeature_fits:
                         next_subfeature_offset = min(subfeature_offset + check_feature_size, code_length)
@@ -366,7 +366,7 @@ class FeatureList(FeatureType):
         index = code[0]
         feature = self._features[index]
         code = code[1:]
-        if not feature.fits(code):
+        if len(code) > len(feature) or not feature.fits(code):
             return False
 
         return True
