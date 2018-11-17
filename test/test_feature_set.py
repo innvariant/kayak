@@ -136,8 +136,8 @@ class FeatureSetTest(unittest.TestCase):
         feature_set_description = {
             'a': ft.natint,
             'b': [
-                {ft.unitfloat, ft.natint, ft.unitfloat},
-                {ft.natint, ft.natint}
+                {'a': ft.unitfloat, 'b': ft.natint, 'c': ft.unitfloat},
+                {'a': ft.natint, 'b': ft.natint}
             ],
             'c': ft.natfloat
         }
