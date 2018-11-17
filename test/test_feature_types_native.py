@@ -350,8 +350,7 @@ class FeatureTypeTest(unittest.TestCase):
         #Arrange
         feature_list = ft.FeatureList([ft.FeatureSet({'x1': ft.NaturalInteger, 'x2': ft.NaturalInteger}),
                                        ft.FeatureSet({'x3': ft.NaturalFloat, 'x4': ft.NaturalInteger,
-                                                      'x5': ft.NaturalFloat})],
-                                      encoding='DYNAMIC')
+                                                      'x5': ft.NaturalFloat})])
 
         #Act
         result = feature_list.sample_random()
@@ -362,9 +361,15 @@ class FeatureTypeTest(unittest.TestCase):
     def test_code_fits_feature_list(self):
 
         #Arrange
-        feature_list = ft.FeatureList([ft.FeatureList([ft.NaturalInteger, ft.NaturalFloat], encoding='DYNAMIC'), ft.NaturalFloat], encoding='DYNAMIC')
+        feature_list = ft.FeatureList([ft.FeatureList([ft.NaturalInteger, ft.NaturalFloat]), ft.NaturalFloat])
+        x =[
+            {'a': ft.unitfloat, 'b': ft.natint, 'c': ft.unitfloat},
+            {'a': ft.natint, 'b': ft.natint}
+        ]
 
-        code = [0, 1, 3.8]
+        feature_list = ft.FeatureList(x)
+
+        code = [0, 0.1, 10, 0.1]
 
         #Act
         result = feature_list.fits(code)
