@@ -192,7 +192,7 @@ class FeatureSet(FeatureType):
 
         for ftype in self:
             if not isinstance(ftype, FeatureType):
-                # We have a native python type, e.g. a string or a number, not a feature type
+                # We have a native python type, e.g. a string or a number, but not a feature type
                 next_subfeature_offset = subfeature_offset + 1
                 subfeature_code = code[subfeature_offset:next_subfeature_offset]
                 if not subfeature_code == ftype:
@@ -206,6 +206,8 @@ class FeatureSet(FeatureType):
                 if feature_size is 1:
                     next_subfeature_offset = subfeature_offset + 1
                     subfeature_code = code[subfeature_offset:next_subfeature_offset]
+                    if len(subfeature_code) < 1:
+                        return False
                     if not ftype.fits(subfeature_code):
                         return False
                     subfeature_offset = next_subfeature_offset
@@ -300,17 +302,16 @@ class FloatType(FeatureType):
     def __len__(self):
         return 1
 
+
 @export
 class FeatureList(FeatureType):
 
     def __init__(self, feature_description, encoding=None):
-
         """
         [
         ft.FeatureSet({'x1': ft.NaturalInteger, 'x2': ft.NaturalInteger}),
         ft.FeatureSet({'x3': ft.NaturalFloat, 'x4': ft.NaturalInteger, 'x5': ft.NaturalFloat})
         ]
-
         """
 
         for i in range(len(feature_description)):
@@ -341,8 +342,6 @@ class FeatureList(FeatureType):
         pass
 
     def sample_random(self):
-
-        code = []
         feature_list = self._features
         encoding = self._encoding
 
@@ -352,15 +351,15 @@ class FeatureList(FeatureType):
             code.extend(feature_list[list_choice].sample_random())
             return code
 
-        elif encoding == encoding_one_hot:
+        if encoding == encoding_one_hot:
             #One Hot Encoding
             raise NotImplementedError('The one_hot_encoding option is not implemented.')
 
-        elif encoding == encoding_max_option:
+        if encoding == encoding_max_option:
             #Maximum Option Encoding
             raise NotImplementedError('The maximum_option_encoding option is not implemented.')
-        else:
-            raise ValueError('Wrong type of encoding.')
+
+        raise ValueError('Wrong type of encoding.')
 
     def fits(self, code):
         index = code[0]
@@ -372,7 +371,6 @@ class FeatureList(FeatureType):
         return True
 
     def __len__(self):
-
         length_list = []
         for feature in self._features:
             length_list.append(len(feature))

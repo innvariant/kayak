@@ -331,52 +331,48 @@ class FeatureTypeTest(unittest.TestCase):
             'f': ft.IntegerType(15, 19)
         })
 
-        feature_set_list = [feature_set_1, feature_set_2, feature_set_3]
+        test_feature_sets = [feature_set_1, feature_set_2, feature_set_3]
 
         code_1 = [8.1, 3.5, 0]
         code_2 = [-10, 3.5]
         code_3 = [10, 5.2, 9.2, 16.7, 16]
 
-        code_list = [code_1, code_2, code_3]
+        test_codes = [code_1, code_2, code_3]
 
         # Act
-        for feature_set, code in zip(feature_set_list, code_list):
+        for feature_set, code in zip(test_feature_sets, test_codes):
             result = feature_set.fits(code)
 
             # Assert
             self.assertFalse(result, 'Code %s may not fit into feature set %s' % (code, feature_set))
 
     def test_sample_feature_list_success(self):
-        #Arrange
+        # Arrange
         feature_list = ft.FeatureList([ft.FeatureSet({'x1': ft.NaturalInteger, 'x2': ft.NaturalInteger}),
                                        ft.FeatureSet({'x3': ft.NaturalFloat, 'x4': ft.NaturalInteger,
                                                       'x5': ft.NaturalFloat})])
 
-        #Act
+        # Act
         result = feature_list.sample_random()
 
-        #Assert
+        # Assert
         print(result)
 
     def test_code_fits_feature_list(self):
-
-        #Arrange
+        # Arrange
         feature_list = ft.FeatureList([ft.FeatureList([ft.NaturalInteger, ft.NaturalFloat]), ft.NaturalFloat])
         x =[
             {'a': ft.unitfloat, 'b': ft.natint, 'c': ft.unitfloat},
             {'a': ft.natint, 'b': ft.natint}
         ]
-
         feature_list = ft.FeatureList(x)
 
         code = [0, 0.1, 10, 0.1]
 
-        #Act
+        # Act
         result = feature_list.fits(code)
 
-
-        #Assert
-
+        # Assert
         self.assertTrue(result)
 
     def test_convert_description_feature_list(self):
