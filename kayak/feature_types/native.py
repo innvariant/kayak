@@ -7,9 +7,9 @@ def extract_single_native_value(code):
     try:
         # Given code might be wrapped in a list / numpy array
         size = len(code)
-        if size > 1:
+        if size is not 1:
             # We expect a single dimension
-            raise ValueError('Expecting a single dimension in code')
+            raise ValueError('Expecting a single dimension in code. Got code of size %s' % size)
         else:
             return code[0]
     except TypeError:
@@ -227,7 +227,7 @@ class FeatureSet(FeatureType):
         return True
 
     def __str__(self):
-        return 'set{' + ','.join([str(feat) for feat in self]) + '}'
+        return '{' + ', '.join([str(feat) for feat in self]) + '}'
 
     def __len__(self):
         return sum(len(feat) for feat in self)
@@ -377,7 +377,7 @@ class FeatureList(FeatureType):
         return max(length_list)
 
     def __str__(self):
-        return 'list[' + ','.join([str(feat) for feat in self]) + ']'
+        return '[' + ', '.join([str(feat) for feat in self]) + ']'
 
 
 NaturalInteger = IntegerType(1, 5000)

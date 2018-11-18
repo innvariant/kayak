@@ -36,11 +36,13 @@ class FeatureTypeTest(unittest.TestCase):
             base_feature_set = {}
             remaining_length = length
             # base_feature_keys = random.sample(string.ascii_lowercase, length)
-            base_feature_keys = random.sample([''.join(cs) for cs in itertools.product(string.ascii_lowercase,
-                                                                                       repeat=math.ceil(math.log(length,
-                                                                                                                 len(
-                                                                                                                     string.ascii_lowercase))))],
-                                              length)
+            base_feature_keys = random.sample(
+                [''.join(cs) for cs in itertools.product(
+                    string.ascii_lowercase,
+                    repeat=math.ceil(math.log(length, len(string.ascii_lowercase)))
+                )],
+                length
+            )
             while remaining_length > 0:
                 use_list_or_base_or_set = random.randint(0, 2)
                 feature_name = base_feature_keys.pop()
@@ -345,47 +347,6 @@ class FeatureTypeTest(unittest.TestCase):
 
             # Assert
             self.assertFalse(result, 'Code %s may not fit into feature set %s' % (code, feature_set))
-
-    def test_sample_feature_list_success(self):
-        # Arrange
-        feature_list = ft.FeatureList([ft.FeatureSet({'x1': ft.NaturalInteger, 'x2': ft.NaturalInteger}),
-                                       ft.FeatureSet({'x3': ft.NaturalFloat, 'x4': ft.NaturalInteger,
-                                                      'x5': ft.NaturalFloat})])
-
-        # Act
-        result = feature_list.sample_random()
-
-        # Assert
-        print(result)
-
-    def test_code_fits_feature_list(self):
-        # Arrange
-        feature_list = ft.FeatureList([ft.FeatureList([ft.NaturalInteger, ft.NaturalFloat]), ft.NaturalFloat])
-        x =[
-            {'a': ft.unitfloat, 'b': ft.natint, 'c': ft.unitfloat},
-            {'a': ft.natint, 'b': ft.natint}
-        ]
-        feature_list = ft.FeatureList(x)
-
-        code = [0, 0.1, 10, 0.1]
-
-        # Act
-        result = feature_list.fits(code)
-
-        # Assert
-        self.assertTrue(result)
-
-    def test_convert_description_feature_list(self):
-
-        # Arrange
-        list = [{'a': ft.unitfloat, 'b': ft.natint}]
-
-        # Act
-
-        feature_list = ft.FeatureList(list)
-
-        # Assert
-        print(feature_list)
 
 
 def _build_feature_set(size, base_types):
