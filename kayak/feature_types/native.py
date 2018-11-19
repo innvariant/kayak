@@ -1,5 +1,7 @@
 import random
 import numpy as np
+import kayak
+
 from .. import export
 
 
@@ -101,7 +103,7 @@ class FeatureSet(FeatureType):
      A feature containing multiple sub-feature_types within a genetic encoding space.
      Single values of this set can only be mutated together.
     """
-    def __init__(self, feature_description, order:list=None):
+    def __init__(self, feature_description, order: list=None):
         """
 
             ```
@@ -117,7 +119,8 @@ class FeatureSet(FeatureType):
 
             Initializing with a list must not be confused with initializing a feature list!
             ```
-            FeatureSet([ft.int, ft.float])
+            FeatureSet([ft.int, ft.float])  # = FeatureSet({1: ft.int, 2: ft.float}, order=[1,2])
+            [ft.int, ft.float]  # = FeatureList([ft.int, ft.float])
             ```
 
         :param feature_description:
@@ -145,8 +148,25 @@ class FeatureSet(FeatureType):
             elif type(ftype) is dict:
                 feature_description[name] = FeatureSet(ftype)
 
+        # Provides O(1) access for positions and provides order of features
+        # ['a', 'b', 1]
+        # _feature_names[1] -> 'b'
+        # _features[_feature_names[1]] -> ftype of 'b'
         self._feature_names = order
+
+        # Provides O(1) access for named features
+        # { 'a': ft.int, 'b': ft.float }
+        # _features['b'] -> ft.float
         self._features = feature_description
+
+    def has_feature(self, name):
+        return name in self._features
+
+    def add_feature(self, name, ftype):
+        if self.has_feature(name):
+            raise ValueError('Feature with that name already contained.')
+        self._feature_names.append(name)
+        self._features[name] = ftype
 
     def __getitem__(self, item):
         if type(item) is int:
@@ -347,9 +367,13 @@ class FeatureList(FeatureType):
 
         if encoding == encoding_dynamic:
             list_choice = random.randint(0, len(feature_list) - 1)
+            ftype = feature_list[list_choice]
             code = [list_choice]
-            code.extend(feature_list[list_choice].sample_random())
-            return code
+            if isinstance(ftype, FeatureType):
+                code.extend(ftype.sample_random().as_numpy())
+            else:
+                code.append(ftype)
+            return kayak.GeneCode(code, self)
 
         if encoding == encoding_one_hot:
             #One Hot Encoding

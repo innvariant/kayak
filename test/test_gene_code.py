@@ -110,7 +110,7 @@ class GeneCodeTest(unittest.TestCase):
         code = [code_val_0, code_val_1, code_val_3]
 
         # Act
-        result = space.contains(code)
+        result = space.fits(code)
 
         # Assert
         self.assertTrue(result)
@@ -131,7 +131,7 @@ class GeneCodeTest(unittest.TestCase):
         code = [code_val_0, code_val_1, code_val_3]
 
         # Act
-        result = space.contains(code)
+        result = space.fits(code)
 
         # Assert
         self.assertFalse(result)

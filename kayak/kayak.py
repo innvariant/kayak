@@ -1,13 +1,14 @@
 import random
 import numpy
 import semantic_version
+from deprecated import deprecated
 from .feature_types import FeatureType
 from .feature_types import FeatureSet
-from .feature_types import FeatureList
 from . import export
 
+
 @export
-class GeneticEncoding(object):
+class GeneticEncoding(FeatureSet):
     """
     Description object for a genetic encoding space based on various feature dimensions which can be manipulated in different ways.
     E.g. there could be one dimension specifying one unique type from a list of given types which can be encoded binary or as integers.
@@ -18,25 +19,18 @@ class GeneticEncoding(object):
     Mutations and mappings determine how you can translate a sampled code from this space into a phenotypical space.
     """
 
-    def __init__(self, name: str, version):
+    def __init__(self, name: str, version, feature_description=None):
+        if feature_description is None:
+            feature_description = {}
+        super().__init__(feature_description)
+
         self._name = name
         try:
             self._version = semantic_version.Version(version)
         except ValueError as e:
             raise ValueError('Invalid semantic version for genetic encoding given', e)
 
-        """
-        An ordered list of feature_types (ordered as it maps the dimensions of the genetic encoding space).
-         [
-         {'name': 'abc', 'type': ['possible_value_1', 'possible_value_2'], offset: 0},
-         {'name': 'def', 'type': ft.UnitFloat, offset: 1},
-         {'name': 'xyz', 'type': [FeatureSet({'a': ft.NaturalInteger, 'b': ft.NaturalInteger}), FeatureSet({'a': ft.NaturalInteger)], offset: 2},
-         {'name': 'tur', 'type': FeatureSet(), offset: 5}
-         ]
-        """
-        self._features = []  # provides O(1) access for positions and provides order of feature_types
-        self._features_by_pos = {}  # provides O(1) access by name for position
-
+    @deprecated
     def contains(self, code):
         """
         Checks if the given code fits into this genetic encoding space.
@@ -49,59 +43,15 @@ class GeneticEncoding(object):
             # Unwrap the code if it is contained within a GeneCode object.
             return self.contains(code.as_numpy())
 
-        subfeature_offset = 0
-        code_length = len(code)
-
-        for feature in self._features:
-            ftype = feature['type']
-            size = len(ftype)
-
-            next_subfeature_offset = subfeature_offset + size
-            if code_length < next_subfeature_offset:
-                return False
-
-            subfeature_code = code[subfeature_offset:next_subfeature_offset]
-            if not ftype.fits(subfeature_code):
-                return False
-
-            subfeature_offset = next_subfeature_offset
-
-        return True
-
-    def add_feature(self, name: str, feature):
-        if self.has_feature(name):
-            raise ValueError('Feature with that name was already added.')
-        next_position = len(self._features)
-        previous_feature = self._features[-1] if len(self._features) > 0 else None
-        next_offset = previous_feature['offset'] + len(previous_feature['type']) if previous_feature is not None else 0
-        #one_hot_encoding = any(hasattr(f, '__len__') and len(f) > 1 for f in feature) if len(feature) > 1 else False
-        self._features.append({'name': name, 'type': feature, 'offset': next_offset})
-        self._features_by_pos = {name: next_position}
-
-    def has_feature(self, name: str):
-        return name in self._features_by_pos
+        return self.fits(code)
 
     def get_dimension(self, name: str):
-        return self._features_by_pos[name]
+        return len(self[name])
 
+    @deprecated('Use the GeneticEncoding space as iterable instead')
     def get_ordered_feature_types(self):
         for feature in self._features:
             yield feature['type']
-
-    def _get_dimensions(self, feature):
-        required_feature_size = len(feature)  # applies for list or FeatureType
-        return required_feature_size
-
-    def sample_random(self):
-        code = []
-        for feature in self._features:
-            feature_name = feature['name']
-            feature_type = feature['type']
-            offset = feature['offset']
-
-            code.extend(_sample_random_from_feature(feature_type))
-
-        return GeneCode(code, self)
 
     def map(self, code, type_check=False):
         print('Code: ', code)
@@ -168,15 +118,16 @@ def _sample_random_from_feature(feature_type):
         # raise NotImplementedError('Unknown feature type for sampling.')
 
 
+@export
 class GeneCode(object):
     """
     A gene is a vector (code) fitting into a certain vector space - its genetic encoding space.
     In addition to a simple numpy array it also provides optimized functionality to access single feature_types of the gene code with respect
     to its genetic encoding space.
     """
-    def __init__(self, code, space: GeneticEncoding):
-        if not space.contains(code):
-            raise ValueError('Code does not fit into genetic encoding space.')
+    def __init__(self, code, space: FeatureType):
+        if not space.fits(code):
+            raise ValueError('Code %s does not fit into genetic encoding space %s.' % (code, space))
         self._code = code
         self._space = space
 
