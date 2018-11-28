@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='kayak',
-    version='0.0.1',
+    version='0.0.2',
     description='Genetic Encoding Space Description Framework',
     author='Chair of Data Science',
     author_email='julian.stier@uni-passau.de',
