@@ -204,7 +204,7 @@ class FeatureSet(FeatureType):
                 code.extend(ftype.sample_random())
             else:
                 raise ValueError('Unknown type for feature: %s' % ftype)
-        return code
+        return kayak.GeneCode(code, self)
 
     def fits(self, code):
         subfeature_offset = 0
