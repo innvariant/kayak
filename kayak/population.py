@@ -1,3 +1,4 @@
+import numpy as np
 from .kayak import GeneticEncoding, GeneCode
 
 class Population(object):
@@ -43,3 +44,26 @@ class Population(object):
 
     def __len__(self):
         return len(self._pop)
+
+    def __iter__(self):
+        return iter(self._pop)
+
+
+class FitnessMap(object):
+    def obtain_fitness(self, gene_code):
+        raise NotImplementedError('Concrete fitness mapping object for population has to be implemented.')
+
+    def __getitem__(self, item):
+        assert isinstance(item, GeneCode), 'Expecting selected item object to be a GeneCode, got type %s' % type(gene_code)
+        return self.obtain_fitness(item)
+
+
+class DelayedRandomFitnessMap(FitnessMap):
+    _fitness_map = {}
+
+    def obtain_fitness(self, gene_code):
+        if gene_code not in self._fitness_map:
+            import time
+            time.sleep(np.random.randint(0, 3))
+            self._fitness_map[gene_code] = np.random.random()
+        return self._fitness_map[gene_code]
