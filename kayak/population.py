@@ -58,12 +58,22 @@ class FitnessMap(object):
         return self.obtain_fitness(item)
 
 
-class DelayedRandomFitnessMap(FitnessMap):
-    _fitness_map = {}
+class CachedFitnessMap(FitnessMap):
+    _cached_fitness = {}
 
     def obtain_fitness(self, gene_code):
-        if gene_code not in self._fitness_map:
-            import time
-            time.sleep(np.random.randint(0, 3))
-            self._fitness_map[gene_code] = np.random.random()
-        return self._fitness_map[gene_code]
+        assert isinstance(gene_code, GeneCode), 'Expecting object to obtain fitness for to be a GeneCode, got type %s' % type(gene_code)
+
+        if gene_code not in self._cached_fitness:
+            self._cached_fitness[gene_code] = self.calculate_fitness(gene_code)
+        return self._cached_fitness[gene_code]
+
+    def calculate_fitness(self, gene_code):
+        raise NotImplementedError('Concrete fitness value calculation for gene code has to be implemented.')
+
+
+class DelayedRandomFitnessMap(CachedFitnessMap):
+    def calculate_fitness(self, gene_code):
+        import time
+        time.sleep(np.random.randint(0, 3))
+        return np.random.random()

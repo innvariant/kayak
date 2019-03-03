@@ -1,6 +1,5 @@
 import unittest
 import kayak
-from multiprocessing.dummy import Pool
 
 
 class PopulationTest(unittest.TestCase):
@@ -31,6 +30,7 @@ class PopulationTest(unittest.TestCase):
 
         random_map = kayak.DelayedRandomFitnessMap()
 
+        from multiprocessing.dummy import Pool
         with Pool(4) as pool:
             async_results = [pool.apply_async(random_map.obtain_fitness, args=(code,)) for code in pop]
             try:
