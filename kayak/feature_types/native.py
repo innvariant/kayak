@@ -96,6 +96,9 @@ class FeatureType(object):
         """
         raise NotImplementedError()
 
+    def __repr__(self):
+        return str(self)
+
 
 @export
 class FeatureSet(FeatureType):
@@ -190,6 +193,10 @@ class FeatureSet(FeatureType):
             code[offset:fsize] = ftype.mutate_random(code[offset:len(ftype)])
             offset += fsize
 
+    def generate_random(self, num_samples):
+        for idx in range(num_samples):
+            yield self.sample_random()
+
     def sample_random(self):
         code = []
         for name in self._features:
@@ -246,6 +253,10 @@ class FeatureSet(FeatureType):
                         return False
         return True
 
+    def __eq__(self, other):
+        # TODO implement native equality check
+        return str(other) == str(self)
+
     def __str__(self):
         return '{' + ', '.join([str(feat) for feat in self]) + '}'
 
@@ -279,7 +290,9 @@ class IntegerType(FeatureType):
             code = extract_single_native_value(code)
         except ValueError:
             return False
-        return type(code) == int and self._lower_border <= code <= self._upper_border
+
+        assert np.issubdtype(type(code), np.signedinteger), 'Assuming code of type "%s" to be integer.' % type(code)
+        return self._lower_border <= code <= self._upper_border
 
     def __str__(self):
         return 'int(%.2f, %.2f)' % (self._lower_border, self._upper_border)
