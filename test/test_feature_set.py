@@ -54,11 +54,35 @@ class FeatureSetTest(unittest.TestCase):
         # Assert
         self.assertTrue(fits)
 
+    def test_simple_code_fits_unnamed_set_fail(self):
+        # Arrange
+        feature_set_description = [ft.natint, ft.natfloat]
+        code = [5.2, 3.8]
+        feature_set = ft.FeatureSet(feature_set_description)
+
+        # Act
+        fits = feature_set.fits(code)
+
+        # Assert
+        self.assertFalse(fits)
+
     def test_simple_code_fits_named_set_success(self):
         # Arrange
         # Note that y and x are not alphabetically sorted, but the code must still fit for default behaviour
         feature_set_description = {'y': ft.natint, 'x': ft.natfloat}
         code = [3.8, 5]
+        feature_set = ft.FeatureSet(feature_set_description)
+
+        # Act
+        fits = feature_set.fits(code)
+
+        # Assert
+        self.assertTrue(fits)
+
+    def test_code_fits_simple_options_success(self):
+        # Arrange
+        feature_set_description = {'a': [ft.natfloat, ft.natint]}
+        code = [1, 3]
         feature_set = ft.FeatureSet(feature_set_description)
 
         # Act
@@ -122,13 +146,14 @@ class FeatureSetTest(unittest.TestCase):
             [0, 0.9, 12.2, 100]
         ]
         feature_set = ft.FeatureSet(feature_set_description)
+        sorted_feature_set_description = {key: feature_set_description[key] for key in sorted(feature_set_description)}
 
         for code in codes:
             # Act
             fits = feature_set.fits(code)
 
             # Assert
-            self.assertTrue(fits, 'Code %s should fit in %s' % (code, feature_set_description))
+            self.assertTrue(fits, 'Code %s should fit in %s' % (code, sorted_feature_set_description))
 
     def test_deeper_nested_code_fits_success(self):
         # Arrange

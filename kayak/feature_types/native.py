@@ -291,8 +291,8 @@ class IntegerType(FeatureType):
         except ValueError:
             return False
 
-        assert np.issubdtype(type(code), np.signedinteger), 'Assuming code of type "%s" to be integer.' % type(code)
-        return self._lower_border <= code <= self._upper_border
+        # Fits must not assert but return False on problematic / non-fitting code.
+        return np.issubdtype(type(code), np.signedinteger) and self._lower_border <= code <= self._upper_border
 
     def __str__(self):
         return 'int(%.2f, %.2f)' % (self._lower_border, self._upper_border)
