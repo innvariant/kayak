@@ -401,8 +401,8 @@ class FeatureList(FeatureType):
     def fits(self, code):
         index = code[0]
         feature = self._features[index]
-        code = code[1:]
-        if len(code) > len(feature) or not feature.fits(code):
+        subcode = code[1:]
+        if len(subcode) > len(feature) or not feature.fits(subcode):
             return False
 
         return True
