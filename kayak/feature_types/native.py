@@ -1,9 +1,10 @@
 import random
 import numpy as np
 import kayak
-
+from deprecated import deprecated
 from .. import export
 
+KAYAK_STRING_OPTIONS_DELIMITER = '|'
 
 def extract_single_native_value(code):
     try:
@@ -18,10 +19,31 @@ def extract_single_native_value(code):
         return code
 
 
-def pythonic_to_object_description(description, order=None):
+def pythonic_to_object_description(description):
     if type(description) is dict:
-        # {'b': int, 'a': float}, ['a', 'b'] -> FeatureSet({'a': float, 'b': int}, ['a', 'b'])
-        new_description = FeatureSet()
+        return FeatureBundle(description)
+
+    elif type(description) is set:
+        return FeatureBundle(description)
+
+    elif type(description) is list:
+        return FeatureOptions(description)
+
+    elif type(description) is tuple:
+        return FeatureOptions(description)
+
+    elif type(description) is int:
+        return IntegerType(min(0, description), max(0, description))
+
+    elif type(description) is float:
+        return FloatType(min(0, description), max(0, description))
+
+    elif type(description is str):
+        string_options = description.split(KAYAK_STRING_OPTIONS_DELIMITER)
+        return FeatureOptions(string_options)
+
+    else:
+        raise NotImplementedError('Unknown pythonic type %s for conversion.' % type(description))
 
 
 @export
@@ -89,17 +111,135 @@ class FeatureType(object):
         """
         raise NotImplementedError()
 
+    @property
+    def min_size(self):
+        raise NotImplementedError()
+
+    @property
+    def max_size(self):
+        raise NotImplementedError()
+
+    @property
+    def dynamically_sized(self):
+        """
+        :return: flag iff this feature type is dynamic in its size, thus if min and max size might differ for different codes.
+        """
+        raise NotImplementedError()
+
     def __len__(self):
         """
         :return: Number of dimensions for feature codes sampled from this feature type.
         :rtype: int
         """
-        raise NotImplementedError()
+        return self.max_size
 
     def __repr__(self):
         return str(self)
 
 
+class FeatureBundle(FeatureType):
+    """
+    A FeatureBundle is a set of one or multiple feature types bundled together.
+    Each sub-feature type adds to the dimensionality of this parental feature type.
+
+    Initialization is done by describing the feature bundle in a pythonic way.
+    This can be done by either using a dictionary (common case) containing a mapping of feature names to feature types.
+    If feature names are not important, the dictionary can be replaced with a pythonic list.
+    In this case each feature type within the list gets mapped to a numeric value (auto-incremented).
+    If the order should be different than lexicographically sorted, an optional ordering can be specified by providing a list.
+    The declaration goes along with a FeatureSet object in version 0.2:
+    ```
+    FeatureBundle({
+        'b': ft.int,
+        'a': [ {ft.int, ft.float}, ft.float ],
+        'c': [
+            { 'x': ft.int, 'y': ft.float },
+            { 'u': ft.float, 'v': ft.int }
+        ]
+    })
+    ```
+
+    Initializing with a list must not be confused with initializing feature options (or a feature list)!
+    ```
+    FeatureBundle([ft.int, ft.float])  # = FeatureBundle({1: ft.int, 2: ft.float}, order=[1,2])
+    [ft.int, ft.float]  # = FeatureOptions([ft.int, ft.float])
+    ```
+
+    Its size is determined by those sub-feature types.
+    If all contained feature types are fixed in size, the resulting feature bundle is also fix in size.
+    This might improve decoding speed.
+    Usually, feature bundles will be dynamic in size.
+    In the case of dynamical dimensionality, at least one sub-feature type is dynamic in size.
+    The minimum size is then the sum of all minimum sizes of each sub-feature type.
+    Accordingly, the maximum size is the sum of all maximum sizes of each sub-feature type.
+
+    With version 0.3 it will replace the existing FeatureSet class to distinguish more clearly between python sets and a set of features in a description space.
+    """
+
+    def __init__(self, feature_description, order: list=None):
+        """
+        :param feature_description:
+        :param order:
+        """
+        if type(feature_description) is set:
+            raise ValueError('We need a deterministic feature name ordering. You can not initialize feature sets with a simple set.')
+
+        # We can either initialize with a list or a dict
+        if type(feature_description) is list:
+            # For sets we need to generate keys / feature names and then create the dict out of it
+            feature_description = {numeric_key: feature for numeric_key, feature in zip(range(len(feature_description)), feature_description)}
+
+        if order is None:
+            order = sorted(feature_description.keys())
+        elif set(feature_description.keys()) != set(order):
+            raise ValueError('Your order list for your feature names do not match up')
+
+        # By default the bundled feature types are assumed to be of fixed-size
+        # If we detect a dynamically sized sub-type, we change this flag
+        self._dynamically_sized = False
+
+        # Transform each pythonic feature representation into an object-representation
+        # Other objects such as concrete FeatureType instances are simply kept
+        for name in feature_description:
+            feature_description[name] = pythonic_to_object_description(feature_description[name])
+
+            # Set this bundle to be dynamically sized if one of its sub-feature types is of dynamical size
+            if not self._dynamically_sized and isinstance(feature_description[name], FeatureType) and feature_description[name].dynamically_sized:
+                self._dynamically_sized = True
+
+        # Provides O(1) access for positions and provides order of features
+        # ['a', 'b', 1]
+        # _feature_names[1] -> 'b'
+        # _features[_feature_names[1]] -> ftype of 'b'
+        self._feature_names = order
+
+        # Provides O(1) access for named features
+        # { 'a': ft.int, 'b': ft.float }
+        # _features['b'] -> ft.float
+        self._features = feature_description
+
+    @property
+    def min_size(self):
+        raise NotImplementedError()
+
+    @property
+    def max_size(self):
+        raise NotImplementedError()
+
+    @property
+    def dynamically_sized(self):
+        """
+        :return: flag iff this feature type is dynamic in its size, thus if min and max size might differ for different codes.
+        """
+        return self._dynamically_sized
+
+
+@export
+class FeatureOptions(FeatureType):
+    pass
+
+
+@deprecated(reason='FeatureSet will be replaced by FeatureBundle to distinguish more clearly between python sets and a set of features in a description space.', version='0.3')
 @export
 class FeatureSet(FeatureType):
     """
@@ -336,6 +476,7 @@ class FloatType(FeatureType):
         return 1
 
 
+@deprecated(reason='FeatureList will be replaced by FeatureOptions to distinguish more clearly between python lists and a option list of features in a description space.', version='0.3')
 @export
 class FeatureList(FeatureType):
 
