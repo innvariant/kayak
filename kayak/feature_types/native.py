@@ -355,14 +355,14 @@ class FeaturePermutation(FeatureType):
         self._encoder = encoder.create(permutation_description)
 
     def sample_random(self):
-        return np.random.randint(len(self._encoder), size=(1,))
+        return kayak.GeneCode(np.random.randint(len(self._encoder), size=(1,)), self)
 
     def decode(self, code):
         return self._encoder.decode(code[0])
 
     def fits(self, code):
         # A permutation code is simply a number in the range of 0 up to 2**n with n being the number of symbols in the permutation
-        return len(code) is 1 and type(code[0]) is int
+        return len(code) is 1 and np.issubdtype(type(code[0]), np.signedinteger)
 
 
 
