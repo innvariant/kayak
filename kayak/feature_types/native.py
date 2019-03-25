@@ -1,6 +1,7 @@
 import random
 import numpy as np
 import kayak
+import itertools
 from deprecated import deprecated
 from .. import export
 
@@ -20,6 +21,9 @@ def extract_single_native_value(code):
 
 
 def pythonic_to_object_description(description):
+    if isinstance(description, FeatureType):
+        return description
+
     if type(description) is dict:
         return FeatureBundle(description)
 
@@ -27,10 +31,10 @@ def pythonic_to_object_description(description):
         return FeatureBundle(description)
 
     elif type(description) is list:
-        return FeatureOptions(description)
+        return FeatureOption(description)
 
     elif type(description) is tuple:
-        return FeatureOptions(description)
+        return FeatureOption(description)
 
     elif type(description) is int:
         return IntegerType(min(0, description), max(0, description))
@@ -38,9 +42,9 @@ def pythonic_to_object_description(description):
     elif type(description) is float:
         return FloatType(min(0, description), max(0, description))
 
-    elif type(description is str):
+    elif type(description) is str:
         string_options = description.split(KAYAK_STRING_OPTIONS_DELIMITER)
-        return FeatureOptions(string_options)
+        return FeatureOption(string_options)
 
     else:
         raise NotImplementedError('Unknown pythonic type %s for conversion.' % type(description))
@@ -124,7 +128,7 @@ class FeatureType(object):
         """
         :return: flag iff this feature type is dynamic in its size, thus if min and max size might differ for different codes.
         """
-        raise NotImplementedError()
+        return self.min_size is not self.max_size
 
     def __len__(self):
         """
@@ -220,11 +224,17 @@ class FeatureBundle(FeatureType):
 
     @property
     def min_size(self):
-        raise NotImplementedError()
+        if not self.dynamically_sized:
+            return len(self._feature_names)
+        else:
+            return sum([ft.min_size for ft in self._features])
 
     @property
     def max_size(self):
-        raise NotImplementedError()
+        if not self.dynamically_sized:
+            return len(self._feature_names)
+        else:
+            return sum([ft.max_size for ft in self._features])
 
     @property
     def dynamically_sized(self):
@@ -235,8 +245,125 @@ class FeatureBundle(FeatureType):
 
 
 @export
-class FeatureOptions(FeatureType):
-    pass
+class FeatureOption(FeatureType):
+    def __init__(self, feature_description:list, encoding=None):
+        """
+        [
+        ft.FeatureBundle({'x1': ft.NaturalInteger, 'x2': ft.NaturalInteger}),
+        ft.FeatureBundle({'x3': ft.NaturalFloat, 'x4': ft.NaturalInteger, 'x5': ft.NaturalFloat})
+        ]
+        """
+
+        converted_description = [pythonic_to_object_description(feature_description[i]) for i in range(len(feature_description))]
+
+        if encoding is None:
+            self._encoding = encoding_dynamic
+        else:
+            self._encoding = encoding
+
+        self._features = converted_description
+
+@export
+class PermutationEncoder(object):
+    @staticmethod
+    def create(permutation_description):
+        raise NotImplementedError('Concrete Encoder has to implement this.')
+
+    @property
+    def version(self):
+        raise NotImplementedError('Concrete Encoder has to implement this.')
+
+    def __str__(self):
+        raise NotImplementedError('Concrete Encoder has to implement this.')
+
+    def __len__(self):
+        raise NotImplementedError('Concrete Encoder has to implement this.')
+
+@export
+class ListPermutationEncoder(PermutationEncoder):
+    @staticmethod
+    def create(permutation_description):
+        return ListPermutationEncoder(permutation_description)
+
+    def __init__(self, description:list):
+        """
+        ['A', 'B', 'C', 'D']
+        :param description:
+        """
+        self._default_permutation = description
+
+    def decode(self, index):
+        # TODO can we solve this more efficient?
+        last_permut = None
+        for _, permut in zip(range(index + 1), itertools.permutations(self._default_permutation)):
+            last_permut = permut
+        return last_permut
+
+    def __len__(self):
+        return len(self._default_permutation)
+
+    @property
+    def version(self):
+        return 1
+
+    def __str__(self):
+        return "ListPermutationEncoder"
+
+@export
+class RangePermutationEncoder(PermutationEncoder):
+    """
+    '1:10'
+    'A:E'
+    """
+    @staticmethod
+    def create(permutation_description):
+        return ListPermutationEncoder(permutation_description)
+
+    def __init__(self, description:list):
+        """
+        ['A', 'B', 'C', 'D']
+        :param description:
+        """
+        self._default_permutation = description
+
+    @property
+    def version(self):
+        return 1
+
+    def __str__(self):
+        return "ListPermutationEncoder"
+
+@export
+class FeaturePermutation(FeatureType):
+    def __init__(self, permutation_description):
+        """
+        [1, 3, 5, 9], ListPermutationEncoder
+        ['A', 'B', 'C', 'D'], ListPermutationEncoder
+        '1:10', RangePermutationEncoder
+        'A:E', RangePermutationEncoder
+        """
+        encoder = None
+        if type(permutation_description) is list:
+            encoder = ListPermutationEncoder
+        elif type(permutation_description) is str:
+            if ':' in permutation_description:
+                encoder = RangePermutationEncoder
+
+        if encoder is None:
+            raise ValueError('Could not find appropriate encoder for permutation %s' % permutation_description)
+
+        self._encoder = encoder.create(permutation_description)
+
+    def sample_random(self):
+        return np.random.randint(len(self._encoder), size=(1,))
+
+    def decode(self, code):
+        return self._encoder.decode(code[0])
+
+    def fits(self, code):
+        # A permutation code is simply a number in the range of 0 up to 2**n with n being the number of symbols in the permutation
+        return len(code) is 1 and type(code[0]) is int
+
 
 
 @deprecated(reason='FeatureSet will be replaced by FeatureBundle to distinguish more clearly between python sets and a set of features in a description space.', version='0.3')
@@ -425,6 +552,18 @@ class IntegerType(FeatureType):
             mutation = self._lower_border
         return mutation
 
+    @property
+    def dynamically_sized(self):
+        return False
+
+    @property
+    def min_size(self):
+        return 1
+
+    @property
+    def max_size(self):
+        return 1
+
     def fits(self, code):
         try:
             code = extract_single_native_value(code)
@@ -468,6 +607,18 @@ class FloatType(FeatureType):
         except ValueError:
             return False
         return self._lower_border <= code <= self._upper_border
+
+    @property
+    def dynamically_sized(self):
+        return False
+
+    @property
+    def min_size(self):
+        return 1
+
+    @property
+    def max_size(self):
+        return 1
 
     def __str__(self):
         return 'float(%.2f, %.2f)' % (self._lower_border, self._upper_border)
@@ -564,6 +715,6 @@ UnitFloat = FloatType(0, 1)
 natint = NaturalInteger
 natfloat = NaturalFloat
 unitfloat = FloatType(0, 1)
-encoding_one_hot = 'ONE_HOT'
+encoding_one_hot = 'ONE_HOT'  # TODO refactor to capital letters
 encoding_dynamic = 'DYNAMIC'
 encoding_max_option = 'MAX_OPTION'
