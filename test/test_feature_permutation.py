@@ -1,5 +1,5 @@
 import unittest
-import kayak.feature_types as ft
+from kayak.feature_types.permutation import FeaturePermutation
 
 class FeaturePermutationTest(unittest.TestCase):
     def test_named_construction_success(self):
@@ -7,11 +7,11 @@ class FeaturePermutationTest(unittest.TestCase):
         permutation_description = ['A', 'B', 'C', 'D']
 
         # Act
-        feature = ft.FeaturePermutation(permutation_description)
+        feature = FeaturePermutation(permutation_description)
         code = feature.sample_random()
 
-        print(code)
-        print(feature.decode(code))
+        print('Code=%s' % code)
+        print('decoded := %s' % feature.decode(code))
 
     def test_numeric_range_construction_success(self):
         # Arrange
@@ -19,9 +19,9 @@ class FeaturePermutationTest(unittest.TestCase):
         permutation_description = '1:%s' % length
 
         # Act
-        feature = ft.FeaturePermutation(permutation_description)
+        feature = FeaturePermutation(permutation_description)
         code = feature.sample_random()
 
-        print(code)
-        print(feature.decode(code))
+        print('Code=%s' % code)
+        print('decoded := %s' % [feature.decode(code)])
         self.assertEqual(len(feature.decode(code)), length)
