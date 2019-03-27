@@ -12,3 +12,16 @@ class FeaturePermutationTest(unittest.TestCase):
 
         print(code)
         print(feature.decode(code))
+
+    def test_numeric_range_construction_success(self):
+        # Arrange
+        length = 8
+        permutation_description = '1:%s' % length
+
+        # Act
+        feature = ft.FeaturePermutation(permutation_description)
+        code = feature.sample_random()
+
+        print(code)
+        print(feature.decode(code))
+        self.assertEqual(len(feature.decode(code)), length)

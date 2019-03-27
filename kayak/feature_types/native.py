@@ -1,3 +1,4 @@
+import math
 import random
 import numpy as np
 import kayak
@@ -273,6 +274,9 @@ class PermutationEncoder(object):
     def version(self):
         raise NotImplementedError('Concrete Encoder has to implement this.')
 
+    def decode(self, index):
+        raise NotImplementedError('Concrete Encoder has to implement this.')
+
     def __str__(self):
         raise NotImplementedError('Concrete Encoder has to implement this.')
 
@@ -300,7 +304,7 @@ class ListPermutationEncoder(PermutationEncoder):
         return last_permut
 
     def __len__(self):
-        return len(self._default_permutation)
+        return math.factorial(len(self._default_permutation))
 
     @property
     def version(self):
@@ -317,14 +321,28 @@ class RangePermutationEncoder(PermutationEncoder):
     """
     @staticmethod
     def create(permutation_description):
-        return ListPermutationEncoder(permutation_description)
+        parts = permutation_description.split(':')
+        assert len(parts) is 2
+        return RangePermutationEncoder(int(parts[0]), int(parts[1]))
 
-    def __init__(self, description:list):
+    def __init__(self, range_start:int, range_end:int):
         """
         ['A', 'B', 'C', 'D']
         :param description:
         """
-        self._default_permutation = description
+        self._range_start = range_start
+        self._range_end = range_end
+        self._default_permutation = range(range_start, range_end + 1)
+
+    def decode(self, index):
+        # TODO can we solve this more efficient?
+        last_permut = None
+        for _, permut in zip(range(index + 1), itertools.permutations(self._default_permutation)):
+            last_permut = permut
+        return last_permut
+
+    def __len__(self):
+        return math.factorial(self._range_end - self._range_start + 1)
 
     @property
     def version(self):
