@@ -1,6 +1,12 @@
+import os
 import yaml
 from setuptools import setup
 
+# Load project version
+with open(os.path.join('./', 'VERSION')) as version_file:
+    project_version = version_file.read().strip()
+
+# Load requirements from environment file
 environment = yaml.load('environment.yml')
 environment_requirements = list()
 for elem in environment['dependencies']:
@@ -13,7 +19,7 @@ print('\n'.join(environment_requirements))
 
 setup(
     name='kayak',
-    version='0.0.1',
+    version=project_version,
     description='Genetic Encoding Space Description Framework',
     author='Chair of Data Science',
     author_email='julian.stier@uni-passau.de',

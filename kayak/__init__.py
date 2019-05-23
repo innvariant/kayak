@@ -8,3 +8,6 @@ def export(defn):
 from .kayak import GeneticEncoding
 from .kayak import GeneCode
 from .feature_types import FeatureType
+from .population import Population
+from .population import FitnessMap
+from .population import DelayedRandomFitnessMap

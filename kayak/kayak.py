@@ -132,7 +132,7 @@ class GeneCode(object):
         self._space = space
 
     def as_numpy(self):
-        return numpy.array(self._code)
+        return numpy.array([el.as_numpy() if isinstance(el, GeneCode) else el for el in self._code])
 
     def assign(self, space: GeneticEncoding):
         """
@@ -158,8 +158,13 @@ class GeneCode(object):
         print(' -- mutate_random')
 
     def __getitem__(self, item):
-        print(item)
         return self._code[item]
 
     def __str__(self):
         return str(self.as_numpy())
+
+    def __repr__(self):
+        return str(self)
+
+    def __len__(self):
+        return len(self._code)

@@ -136,6 +136,18 @@ class GeneCodeTest(unittest.TestCase):
         # Assert
         self.assertFalse(result)
 
+    def test_sample_single_feature(self):
+        # Arrange
+        space = kayak.GeneticEncoding('test', '0.1.0')
+        space.add_feature('test', [1, 2, 3])
+
+        # Act
+        code = space.sample_random()
+
+        # Assert
+        self.assertIs(code, kayak.GeneCode)
+        self.assertIn(code.as_numpy(), [1, 2, 3])
+
     def test_sample_genespace(self):
 
         space = kayak.GeneticEncoding('test', '1.2.0')
