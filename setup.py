@@ -13,8 +13,6 @@ setup(
     author_email='julian.stier@uni-passau.de',
     packages=['kayak'],
     py_modules=['kayak'],
-    install_requires=[],
-    dependency_links=[],
     extras_require={
         'NetworkX': ['networkx']
     }
