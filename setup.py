@@ -5,6 +5,11 @@ from setuptools import setup
 with open(os.path.join('./', 'VERSION')) as version_file:
     project_version = version_file.read().strip()
 
+requirements = [
+    'deprecated',
+    'semantic_version'
+]
+
 setup(
     name='kayak',
     version=project_version,
@@ -13,6 +18,7 @@ setup(
     author_email='julian.stier@uni-passau.de',
     packages=['kayak'],
     py_modules=['kayak'],
+    install_requires=requirements,
     extras_require={
         'NetworkX': ['networkx']
     }
