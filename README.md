@@ -27,7 +27,16 @@ code_map = space.map(code)  # e.g. {'number_neurons': 500, 'number_edges': 10000
 pip install --upgrade git+ssh://git@gitlab.padim.fim.uni-passau.de:13003/paddle/kayak.git
 ```
 
+**Add as environment.yml dependency**
+```yaml
+- pip:
+    - "--editable=git+ssh://git@gitlab.padim.fim.uni-passau.de:13003/paddle/kayak.git#egg=kayak-master"
+```
+
 # Development
 General issue tag tracking: https://gitlab.padim.fim.uni-passau.de/paddle/management/issues?scope=all&utf8=%E2%9C%93&state=opened&label_name[]=project-kayak
 
 During development, have a look into issues of the management repo, e.g. in https://gitlab.padim.fim.uni-passau.de/paddle/management/issues/15
+
+**Update setup requirements**
+``conda list -e > requirements.txt``
