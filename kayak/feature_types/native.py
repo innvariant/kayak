@@ -43,6 +43,8 @@ def pythonic_to_object_description(description):
 
     elif type(description) is str:
         string_options = description.split(KAYAK_STRING_OPTIONS_DELIMITER)
+        if len(string_options) < 2:
+            return description
         return FeatureOption(string_options)
 
     else:
@@ -104,6 +106,9 @@ class FeatureType(object):
         :rtype: kayak.GeneCode
         """
         raise NotImplementedError()
+
+    def build(self, code):
+        return code
 
     def fits(self, code):
         """
@@ -372,7 +377,7 @@ class FeatureSet(FeatureType):
                 else:
                     code.append(list_choice)
             elif isinstance(ftype, FeatureType):
-                code.extend(ftype.sample_random())
+                code.extend(ftype.sample_random().flatten())
             else:
                 raise ValueError('Unknown type for feature: %s' % ftype)
         return kayak.GeneCode(code, self)
@@ -522,6 +527,56 @@ class FloatType(FeatureType):
 
     def __len__(self):
         return 1
+
+
+@export
+class Matrix(FeatureType):
+    def __init__(self, *args, **kwargs):
+        """
+        ft.Matrix(2, 5, 3)
+        :param args:
+        :param kwargs:
+        """
+        shape = []
+        for arg in args:
+            shape.append(int(arg))
+        self._shape = shape
+        self._lower_border = kwargs['lower_border'] if 'lower_border' in kwargs else -100
+        self._upper_border = kwargs['upper_border'] if 'upper_border' in kwargs else 100
+
+    def sample_random(self):
+        return np.random.uniform(self._lower_border, self._upper_border, self._shape)
+
+    def mutation_difference(self):
+        range = round((self._upper_border - self._lower_border) * 0.1)
+        return np.random.randint(-range, range)
+
+    def fits(self, code):
+        code = np.array(code)
+        if len(code.shape) > 1:
+            return np.all(np.equal(code.shape, self._shape))
+        return code.shape[0] is len(self) # Code can be exactly reshaped
+
+    def build(self, code):
+        code = np.array(code)
+        code.resize(self._shape)
+        return code
+
+    @property
+    def dynamically_sized(self):
+        return False
+
+    @property
+    def min_size(self):
+        return np.prod(self._shape)
+
+    @property
+    def max_size(self):
+        return np.prod(self._shape)
+
+    def __str__(self):
+        return 'mat(%s)' % (','.join(['%s'%d for d in self._shape]))
+
 
 
 @deprecated(reason='FeatureList will be replaced by FeatureOptions to distinguish more clearly between python lists and a option list of features in a description space.', version='0.3')

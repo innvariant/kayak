@@ -131,6 +131,7 @@ class GeneCode(object):
         self._code = code
         self._space = space
 
+    @deprecated(reason='Kayak by definition will wrap numpy arrays.', version='0.3')
     def as_numpy(self):
         return numpy.array([el.as_numpy() if isinstance(el, GeneCode) else el for el in self._code])
 
@@ -158,7 +159,44 @@ class GeneCode(object):
         print(' -- mutate_random')
 
     def __getitem__(self, item):
-        return self._code[item]
+        if type(item) is int:
+            if item >= len(self._space):
+                raise IndexError('Index exceeds number of features in Gene Code.')
+
+            # Count increasing code_index for all ftypes
+            return_code = False
+            code_offset = 0
+            code_length = len(self._code)
+            for ftype_idx, ftype in enumerate(self._space):
+                # Only count up to ftype_idx which was requested
+                if ftype_idx is item:
+                    return_code = True
+
+                feature_size = len(ftype)
+
+                if not ftype.dynamically_sized:
+                    if return_code:
+                        next_subfeature_offset = min(code_offset + feature_size, code_length)
+                        subfeature_code = self._code[code_offset:next_subfeature_offset]
+                        return ftype.build(subfeature_code)
+
+                    # Fixed-sized ftype lets us simply add its size to jump over its code
+                    code_offset += feature_size
+                else:
+                    check_feature_size = feature_size + 1  # Start with maximum possible size of sub feature
+                    subfeature_fits = False
+                    while check_feature_size > 0 and not subfeature_fits:
+                        next_subfeature_offset = min(code_offset + check_feature_size, code_length)
+                        subfeature_code = self._code[code_offset:next_subfeature_offset]
+                        if ftype.fits(subfeature_code):
+                            subfeature_fits = True
+                            if return_code:
+                                return ftype.build(subfeature_code)
+
+                            code_offset = next_subfeature_offset  # Update next code offset
+                        check_feature_size -= 1  # Decrease feature size to check
+
+        raise ValueError('Accessing non-integer indices not supported.')
 
     def __str__(self):
         return str(self.as_numpy())
