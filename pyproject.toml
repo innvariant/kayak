@@ -1,0 +1,79 @@
+[tool.poetry]
+name = "kayak"
+version = "0.3.0"
+description = ""
+authors = [
+    "Julian Stier <julian.stier@uni-passau.de>"
+]
+license = "MIT"
+
+include = [
+    "pyproject.toml",
+    "README.md"
+]
+
+readme = "README.md"
+
+homepage = "https://github.com/innvariant/kayak"
+repository = "https://github.com/innvariant/kayak"
+documentation = "https://kayak.readthedocs.io"
+
+keywords = ["genetic algorithm", "evolutionary search", "gene encoding", "search space", "gene sampling"]
+
+[tool.poetry.dependencies]
+python = ">=3.7"
+networkx = ">=2.0"
+importlib-resources = "^1.4.0"
+semantic_version = "^2.8.4"
+deprecated = "^1.2.10"
+
+[tool.poetry.dev-dependencies]
+black = { version = "^20.8b1", python = "^3.6" }
+matplotlib = { version = "^3.3" }
+pre-commit = "^2.3.0"
+pytest = "^3.0"
+pytest-mock = "^3.0.0"
+pyfakefs = "^4.0.2"
+torchvision = "^0.6.1"
+mkdocs = "^1.1.2"
+
+[tool.isort]
+profile = "black"
+line_length = 88
+force_single_line = true
+atomic = true
+include_trailing_comma = true
+lines_after_imports = 2
+lines_between_types = 1
+multi_line_output = 3
+use_parentheses = true
+filter_files = true
+src_paths = ["kayak", "tests"]
+skip_glob = ["*/setup.py", "res/", "examples/"]
+known_first_party = "kayak"
+known_third_party = ["importlib_metadata", "importlib_resources", "pytest", "semantic_version" ]
+
+[tool.black]
+line-length = 88
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | res
+  | build
+  | dist
+  | tests/cache/
+  | tests/.*/setup.py
+)/
+'''
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
